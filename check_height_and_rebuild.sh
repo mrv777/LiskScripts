@@ -10,6 +10,7 @@
 #!/bin/bash
 
 SRV=127.0.0.1:8000
+LISK_DIR="~/lisk-main/"
 
 ## Thanks to cc001 and hagie for improvements here
 find_newest_snap_rebuild(){
@@ -80,7 +81,7 @@ local_height() {
 	if [ "$diff" -gt "4" ]
 	then
         echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
-		cd ~/lisk-main/
+		cd $LISK_DIR
 		bash lisk.sh reload
 		sleep 60
 		
