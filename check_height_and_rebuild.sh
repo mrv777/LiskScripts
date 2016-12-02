@@ -9,6 +9,7 @@
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
+##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to reenable forging when done
 SRV=127.0.0.1:8000
 
 ## Thanks to cc001 and hagie for improvements here
@@ -113,9 +114,12 @@ local_height() {
 				else
 					echo "" "$s1" " " "$s2"
 					echo "Looks like rebuilding finished. We can stop this"
+					##curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## Uncomment this line if you want this script to reenable forging when done
 					break
 				fi
 			done
+		##else ## Uncomment this line if you want this script to reenable forging when done
+			##curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## Uncomment this line if you want this script to reenable forging when done
 		fi
 	fi
 }
