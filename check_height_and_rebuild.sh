@@ -52,7 +52,7 @@ find_newest_snap_rebuild(){
 
     ## bash lisk.sh stop ## Trying to figure out why rebuilding from block 0.  Attempting to stop first to make sure the DB shuts down too
     ## sleep 5
-    bash lisk.sh rebuild -u $SNAP
+    bash lisk.sh rebuild -u $REPO
 }
 
 top_height(){
