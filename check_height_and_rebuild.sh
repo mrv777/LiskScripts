@@ -11,93 +11,53 @@
 
 SRV=127.0.0.1:8000
 
+## Thanks to cc001 and hagie for improvements here
 find_newest_snap_rebuild(){
-	## Find newest snapshot
-	## isabella
-	SNAP1URL="https://snapshot.liskwallet.net"
-	SNAP1="https://snapshot.liskwallet.net/blockchain.db.gz"
-	SNAP1TIME=$(curl -sI "$SNAP1" | grep Last-Modified | cut -f2- -d:)
-	SNAP1TIME=$(date -d "$SNAP1TIME" +"%s")
 
-	## Gr33nDrag0n
-	SNAP2URL="https://snapshot.lisknode.io"
-	SNAP2="https://snapshot.lisknode.io/blockchain.db.gz"
-	SNAP2TIME=$(curl -sI "$SNAP2" | grep Last-Modified | cut -f2- -d:)
-	SNAP2TIME=$(date -d "$SNAP2TIME" +"%s")
+	SNAPSHOTS=(
+	  https://downloads.lisk.io/lisk/main/blockchain.db.gz	## Official
+	  https://snapshot.liskwallet.net/blockchain.db.gz		## isabella
+	  https://snapshot.lisknode.io/blockchain.db.gz			## Gr33nDrag0n
+	  https://lisktools.io/backups/blockchain.db.gz			## MrV
+	  https://snapshot.punkrock.me/blockchain.db.gz			## punkrock
+	  https://snapshot.lsknode.org/blockchain.db.gz			## redsn0w
+	)
 
-	## MrV
-	SNAP3URL="https://lisktools.io/backups"
-	SNAP3="https://lisktools.io/backups/blockchain.db.gz"
-	SNAP3TIME=$(curl -sI "$SNAP3" | grep Last-Modified | cut -f2- -d:)
-	SNAP3TIME=$(date -d "$SNAP3TIME" +"%s")
-	
-	## Official
-	SNAP4URL="https://downloads.lisk.io/lisk/main"
-	SNAP4="https://downloads.lisk.io/lisk/main/blockchain.db.gz"
-	SNAP4TIME=$(curl -sI "$SNAP4" | grep Last-Modified | cut -f2- -d:)
-	SNAP4TIME=$(date -d "$SNAP4TIME" +"%s")
-	
-	## punkrock
-	SNAP5URL="https://snapshot.punkrock.me"
-	SNAP5="https://snapshot.punkrock.me/blockchain.db.gz"
-	SNAP5TIME=$(curl -sI "$SNAP5" | grep Last-Modified | cut -f2- -d:)
-	SNAP5TIME=$(date -d "$SNAP5TIME" +"%s")
-	
-	## redsn0w
-	SNAP6URL="https://snapshot.lsknode.org"
-	SNAP6="https://snapshot.lsknode.org/blockchain.db.gz"
-	SNAP6TIME=$(curl -sI "$SNAP6" | grep Last-Modified | cut -f2- -d:)
-	SNAP6TIME=$(date -d "$SNAP6TIME" +"%s")
-	
+	BESTSNAP=""
+	BESTTIMESTAMP=0
+	BESTSNAPLENGTH=0
 
-	SNAPURL=$SNAP1URL
-	SNAP=$SNAP1
-	SNAPTIME=$SNAP1TIME
-	## echo "$SNAP2TIME - $SNAPTIME" 
-	if [ "$SNAP2TIME" -gt "$SNAPTIME" ]; 
-	then
-		SNAPURL=$SNAP2URL
-		SNAP=$SNAP2
-		SNAPTIME=$SNAP2TIME
-	fi
+	for SNAP in ${SNAPSHOTS[@]}
+	do
+	  echo "$SNAP"
+	  SNAPSTATUS=$(curl -sI "$SNAP" | grep "HTTP" | cut -f2 -d" ")
+	  SNAPLENGTH=$(curl -sI "$SNAP" | grep "Length" | cut -f2 -d" ")
+	  SNAPLENGTH="${SNAPLENGTH//[$'\t\r\n ']}"
+	  if [ "$SNAPSTATUS" -eq "200" ]
+	  then
+		  TIME=$(curl -sI "$SNAP" | grep Last-Modified | cut -f2 -d:)
+		  TIMESTAMP=$(date -d "$TIME" +"%s")
+		  echo $TIMESTAMP
+		  if [ "$TIMESTAMP" -gt "$BESTTIMESTAMP" ] && [ "$SNAPLENGTH" -gt "$BESTSNAPLENGTH" ]; ## Make sure it is the newest and the largest
+		  then
+			 BESTSNAP=$SNAP
+			 BESTTIMESTAMP=$TIMESTAMP
+			 BESTSNAPLENGTH=$SNAPLENGTH
+		  fi
+	   fi
+	done
+    
+    REPO=${BESTSNAP%/blockchain.db.gz}
+	echo "Newest snap: $BESTSNAP | Rebuilding from $REPO"
 
-	##echo "$SNAP3TIME - $SNAPTIME" 
-	if [ "$SNAP3TIME" -gt "$SNAPTIME" ]; 
-	then
-		SNAPURL=$SNAP3URL
-		SNAP=$SNAP3
-		SNAPTIME=$SNAP3TIME
-	fi
-	
-	if [ "$SNAP4TIME" -gt "$SNAPTIME" ]; 
-	then
-		SNAPURL=$SNAP4URL
-		SNAP=$SNAP4
-		SNAPTIME=$SNAP4TIME
-	fi
-	
-	if [ "$SNAP5TIME" -gt "$SNAPTIME" ]; 
-	then
-		SNAPURL=$SNAP5URL
-		SNAP=$SNAP5
-		SNAPTIME=$SNAP5TIME
-	fi
-	
-	if [ "$SNAP6TIME" -gt "$SNAPTIME" ]; 
-	then
-		SNAPURL=$SNAP6URL
-		SNAP=$SNAP6
-		SNAPTIME=$SNAP6TIME
-	fi
-	
-	echo "Newest snap: $SNAP | Rebuilding from it..."
-	#bash lisk.sh stop ## Trying to figure out why rebuilding from block 0.  Attempting to stop first to make sure the DB shuts down too
-	#sleep 2
-	bash lisk.sh rebuild -u $SNAPURL
+    ## bash lisk.sh stop ## Trying to figure out why rebuilding from block 0.  Attempting to stop first to make sure the DB shuts down too
+    ## sleep 5
+    bash lisk.sh rebuild -u $SNAP
 }
 
 top_height(){
 	## Get height of your 100 peers and save the highest value
+	## Thanks to wannabe_RoteBaron for this improvement
 	HEIGHT=$(curl -s http://$SRV/api/peers | jq '.peers[].height' | sort -nu | tail -n1)
 	## Make sure height is not empty, if it is empty try the call until it is not empty
 	while [ -z "$HEIGHT" ]
@@ -139,7 +99,7 @@ local_height() {
 			echo "Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 			find_newest_snap_rebuild
 			#sleep 420
-			## Thank you corsaro for this improvement :)
+			## Thank you corsaro for this improvement
 			while true; do
 				s1=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
 				sleep 60
@@ -148,7 +108,7 @@ local_height() {
 				diff=$(( $s2 - $s1 ))
 				if [ "$diff" -gt "10" ];
 				then
-					echo "$s2" "is too greater then " "$s1"
+					echo "$s2" "is a lot greater then " "$s1"
 					echo "It looks like rebuild has not finished yet. Waiting longer to continue"
 				else
 					echo "" "$s1" " " "$s2"
