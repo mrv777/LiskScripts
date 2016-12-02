@@ -48,3 +48,5 @@ How to run:
 4. `screen`
 5. `bash manage3.sh`
 6. CTRL+A, D to detach the screen
+
+*Donation Address: 3532362465127676136L*
