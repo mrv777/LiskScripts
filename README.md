@@ -3,6 +3,7 @@
 ### check_consensus.sh
 This script looks at the last two lines of the log: ~/lisk-main/logs/lisk.log for the word 'Inadequate'.  If it sees that word then it tries to swtich forging quickly to server 2.  If server two is not at a good height, it tries server 3 if available
 
+## My Anti-fork script
 ### init_height_and_rebuild.sh
 Wrapper script for check_height_and_rebuild.sh.  You only need to use this script directly and not check_height_and_rebuild.sh.  Commands are:
 * start         -- starts script
