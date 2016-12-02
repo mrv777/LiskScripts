@@ -12,9 +12,13 @@ This script looks at the last two lines of the log: ~/lisk-main/logs/lisk.log fo
 
 How to run:
 
-1. sudo apt-get install jq
-2. wget https://lisktools.io/backups/init_height_and_rebuild.sh
-3. bash init_height_and_rebuild.sh start
+1. `sudo apt-get install jq`
+2. `wget https://lisktools.io/backups/init_height_and_rebuild.sh`
+3. `bash init_height_and_rebuild.sh start`
+
+To check the logs and what the script is going:
+
+* `tail -f heightRebuild.log`
 
 ### init_height_and_rebuild.sh
 Wrapper script for check_height_and_rebuild.sh.  You only need to use this script directly and not check_height_and_rebuild.sh.  Commands are:
