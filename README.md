@@ -26,4 +26,7 @@ Compares the height of your 100 connected peers and gets the highest height.  Th
 
 ## My Management script
 
-### BETA
+### manage3.sh (BETA)
+This script will check the block heights of 3 servers and make sure the one forging is near the top height of the 3, if not it switches to the next server (1->2,2->3,3->1).  It also makes sure only one server is forging.
+
+Currently designed to run in a screen on it's own monitoring server.  Just fill in the top variable in the script and then run it `bash manage3.sh`
