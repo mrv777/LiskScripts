@@ -43,7 +43,7 @@ Currently designed to run in a screen on it's own monitoring server.
 How to run:
 
 1. `sudo apt-get install jq screen`
-2. `wget https://lisktools.io/backups/manage3.sh`
+2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/manage3.sh`
 3. `nano manage3.sh` and edit the top variables
 4. `screen`
 5. `bash manage3.sh`
