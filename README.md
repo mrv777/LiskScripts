@@ -6,6 +6,7 @@ This script looks at the last two lines of the log: ~/lisk-main/logs/lisk.log fo
 ## My Anti-fork script
 
 How to run:
+
 1. sudo apt-get install jq
 2. wget https://lisktools.io/backups/init_height_and_rebuild.sh
 3. bash init_height_and_rebuild.sh start
