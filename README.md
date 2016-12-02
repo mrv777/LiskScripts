@@ -25,7 +25,7 @@ Wrapper script for check_height_and_rebuild.sh.  You only need to use this scrip
 ### check_height_and_rebuild.sh
 **User does not need to directly do anything with this.  init_height_and_rebuild.sh interfaces with it automatically**
 
-Compares the height of your 100 connected peers and gets the highest height.  Then checks your node is within 4 blocks of it.  If not, it tries a reload first.  If the reload only gets it further away, it tries a rebuild.  The rebuild attempts to get the newest snap availble from servers listed. 
+Compares the height of your 100 connected peers and gets the highest height.  Then checks your node is within 4 blocks of it.  If not, it tries a reload first.  If the reload doesn't get it back within an acceptable range, it tries a rebuild.  The rebuild attempts to get the newest snap availble from servers listed. 
 
 **NOTE: The is currently not the best.  Howver, it's better because it now looks for the most recently modified file and the biggest file.  It should look for the highest block though.**
 
