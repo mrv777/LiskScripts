@@ -1,4 +1,4 @@
-# LiskScript-HeightRebuild  (BETA)
+# Lisk Delegate Scripts  (BETA)
 
 ## My consensus check script
 
