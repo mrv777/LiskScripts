@@ -21,7 +21,7 @@ find_newest_snap_rebuild(){
 	  https://snapshot.lisknode.io/blockchain.db.gz			## Gr33nDrag0n
 	  https://lisktools.io/backups/blockchain.db.gz			## MrV
 	  https://snapshot.punkrock.me/blockchain.db.gz			## punkrock
-	  https://snapshot.lsknode.org/blockchain.db.gz			## redsn0w
+	  https://snap.lsknode.org/blockchain.db.gz			## redsn0w
 	)
 
 	BESTSNAP=""
