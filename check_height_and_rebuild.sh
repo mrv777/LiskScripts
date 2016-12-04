@@ -12,6 +12,16 @@
 ##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to reenable forging when done
 SRV=127.0.0.1:8000
 
+cd ~/lisk-main/  ## Set to your lisk directory if different
+
+## Copied from lisk.sh
+LISK_CONFIG=config.json
+DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
+LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
+LOGS_DIR="$(pwd)/logs"
+PIDS_DIR="$(pwd)/pids"
+PID_FILE="$PIDS_DIR/$DB_NAME.pid"
+
 ## Thanks to cc001 and hagie for improvements here
 find_newest_snap_rebuild(){
 
@@ -21,7 +31,7 @@ find_newest_snap_rebuild(){
 	  https://snapshot.lisknode.io/blockchain.db.gz			## Gr33nDrag0n
 	  https://lisktools.io/backups/blockchain.db.gz			## MrV
 	  https://snapshot.punkrock.me/blockchain.db.gz			## punkrock
-	  https://snap.lsknode.org/blockchain.db.gz			## redsn0w
+	  https://snap.lsknode.org/blockchain.db.gz				## redsn0w
 	)
 
 	BESTSNAP=""
@@ -81,7 +91,6 @@ local_height() {
 	if [ "$diff" -gt "4" ]
 	then
         echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
-		cd ~/lisk-main/
 		bash lisk.sh reload
 		sleep 60
 		
@@ -124,8 +133,46 @@ local_height() {
 	fi
 }
 
+## Copied from lisk.sh
+check_status() {
+  if [ -f "$PID_FILE" ]; then
+    PID="$(cat "$PID_FILE")"
+  fi
+  if [ ! -z "$PID" ]; then
+    ps -p "$PID" > /dev/null 2>&1
+    STATUS=$?
+  else
+    STATUS=1
+  fi
+  if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
+    echo "√ Lisk is running as PID: $PID"
+    blockheight
+    return 0
+  else
+    echo "X Lisk is not running."
+    return 1
+  fi
+}
+start_lisk() {
+  if check_status == 1 &> /dev/null; then
+    check_status
+    exit 1
+  else
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
+    if [ $? == 0 ]; then
+      echo "√ Lisk started successfully."
+      sleep 3
+      check_status
+    else
+      echo "X Failed to start Lisk."
+    fi
+  fi
+}
+
 while true; do
 	## Check that lisk is running first!!
+	start_lisk
+	
 	top_height
 	local_height
 
