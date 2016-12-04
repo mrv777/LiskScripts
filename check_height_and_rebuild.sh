@@ -9,6 +9,11 @@
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
+if [ "\$USER" == "root" ]; then
+  echo "Error: Do not run this as root. Exiting."
+  exit 1
+fi
+
 ##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to reenable forging when done
 SRV=127.0.0.1:8000
 
@@ -42,6 +47,11 @@ find_newest_snap_rebuild(){
 	do
 	  echo "$SNAP"
 	  SNAPSTATUS=$(curl -sI "$SNAP" | grep "HTTP" | cut -f2 -d" ")
+	  ## Check that we got a number for comparison later
+	  if [[  -z "$SNAPSTATUS" ]];
+		then
+			SNAPSTATUS="999"
+		fi
 	  SNAPLENGTH=$(curl -sI "$SNAP" | grep "Length" | cut -f2 -d" ")
 	  SNAPLENGTH="${SNAPLENGTH//[$'\t\r\n ']}"
 	  if [ "$SNAPSTATUS" -eq "200" ]
