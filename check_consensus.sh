@@ -4,12 +4,14 @@ SRV1="localhost"
 SRV2="xxx.xxx.xxx.xxx"
 SRV3=""
 PRTS=":2443"
+TXTDELAY=0
 while true; do
 	LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
-	HEIGHTLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1":8000/api/loader/status/sync"| jq '.height')
+	HEIGHTLOCAL=$(curl --connect-timeout 2 -s "http://"$SRV1":8000/api/loader/status/sync"| jq '.height')
 	if [[ -n "$LASTLINE" ]]
 	then
-		HEIGHT=$(curl --connect-timeout 3 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.height')
+		HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.height')
+		echo "WARNING: $LASTLINE"
 		
 		## Make sure second server is not more than 3 blocks behind this server and if not, then switch
 		if [[  -n "$HEIGHT" ]];
@@ -27,7 +29,7 @@ while true; do
 			sleep 2
 		elif [[  -n "$SRV3" ]] ## If a third server is set, try that one
 		then
-			HEIGHT=$(curl --connect-timeout 3 -s "http://"$SRV3":8000/api/loader/status/sync"| jq '.height')
+			HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV3":8000/api/loader/status/sync"| jq '.height')
 
 			if [[  -n "$HEIGHT" ]];
 			then
@@ -45,6 +47,11 @@ while true; do
 			fi
 		fi
 	fi
-    echo -ne "$HEIGHTLOCAL | "
-    sleep 1
+	(( ++TXTDELAY ))
+	if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
+	then
+		echo "Still working at block $HEIGHTLOCAL"
+		TXTDELAY=0
+	fi
+    	sleep 1
 done
