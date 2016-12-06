@@ -9,7 +9,9 @@
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
-if [ "\$USER" == "root" ]; then
+# gregorst
+if [[ "$EUID" -eq 0 ]];
+then
   echo "Error: Do not run this as root. Exiting."
   exit 1
 fi
@@ -42,6 +44,8 @@ find_newest_snap_rebuild(){
 	BESTSNAP=""
 	BESTTIMESTAMP=0
 	BESTSNAPLENGTH=0
+	
+	BESTSNAP2=""
 
 	for SNAP in ${SNAPSHOTS[@]}
 	do
@@ -61,6 +65,9 @@ find_newest_snap_rebuild(){
 		  echo $TIMESTAMP
 		  if [ "$TIMESTAMP" -gt "$BESTTIMESTAMP" ] && [ "$SNAPLENGTH" -gt "$BESTSNAPLENGTH" ]; ## Make sure it is the newest and the largest
 		  then
+		  	 ## Save previous best snap as the other choice
+			 BESTSNAP2=$BESTSNAP
+			 
 			 BESTSNAP=$SNAP
 			 BESTTIMESTAMP=$TIMESTAMP
 			 BESTSNAPLENGTH=$SNAPLENGTH
@@ -68,12 +75,19 @@ find_newest_snap_rebuild(){
 	   fi
 	done
     
-    REPO=${BESTSNAP%/blockchain.db.gz}
-	echo "Newest snap: $BESTSNAP | Rebuilding from $REPO"
-
-    ## bash lisk.sh stop ## Trying to figure out why rebuilding from block 0.  Attempting to stop first to make sure the DB shuts down too
-    ## sleep 5
-    bash lisk.sh rebuild -u $REPO
+    ## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
+    WHICHSNAP = $((1 + RANDOM % 2))
+    
+    if [ "$WHICHSNAP" -eq "1" ];
+    then
+    	REPO=${BESTSNAP%/blockchain.db.gz}
+		echo "Newest snap: $BESTSNAP | Rebuilding from $REPO"
+    	bash lisk.sh rebuild -u $REPO
+    else
+    	REPO=${BESTSNAP2%/blockchain.db.gz}
+		echo "Newest snap: $BESTSNAP2 | Rebuilding from $REPO"
+    	bash lisk.sh rebuild -u $REPO
+    fi
 }
 
 top_height(){
@@ -133,12 +147,18 @@ local_height() {
 				else
 					echo "" "$s1" " " "$s2"
 					echo "Looks like rebuilding finished. We can stop this"
-					##curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## Uncomment this line if you want this script to reenable forging when done
+					if [[ -z "$SECRET" ]];
+					then
+						curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
+					fi
 					break
 				fi
 			done
-		##else ## Uncomment this line if you want this script to reenable forging when done
-			##curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## Uncomment this line if you want this script to reenable forging when done
+		else
+			if [[ -z "$SECRET" ]];
+			then
+				curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## Uncomment this line if you want this script to reenable forging when done
+			fi
 		fi
 	fi
 }
@@ -155,8 +175,7 @@ check_status() {
     STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
-    echo "√ Lisk is running as PID: $PID"
-    blockheight
+    ## echo "√ Lisk is running as PID: $PID"
     return 0
   else
     echo "X Lisk is not running."
@@ -164,17 +183,13 @@ check_status() {
   fi
 }
 start_lisk() {
-  if check_status == 1 &> /dev/null; then
-    check_status
-    exit 1
-  else
+  if check_status != 1 &> /dev/null; then
     forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
-      sleep 3
-      check_status
     else
       echo "X Failed to start Lisk."
+      exit 1
     fi
   fi
 }
