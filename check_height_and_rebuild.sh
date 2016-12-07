@@ -147,11 +147,11 @@ local_height() {
 			## Thank you corsaro for this improvement
 			while true; do
 				s1=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
-				sleep 60
+				sleep 30
 				s2=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
 
 				diff=$(( $s2 - $s1 ))
-				if [ "$diff" -gt "10" ];
+				if [ "$diff" -gt "5" ];
 				then
 					echo "$s2" "is a lot greater then " "$s1"
 					echo "It looks like rebuild has not finished yet. Waiting longer to continue"
