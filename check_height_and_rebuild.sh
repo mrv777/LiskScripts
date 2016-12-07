@@ -194,7 +194,10 @@ check_status() {
   fi
 }
 start_lisk() {
-  if check_status != 1 &> /dev/null; then
+  if check_status == 1 &> /dev/null; then
+    check_status
+    ##exit 1
+  else
     forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
