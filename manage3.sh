@@ -33,20 +33,20 @@ PRT3=$PRT1     # same port used on both server
 PRTS=":2443"   # port used on https
 pbk="PUBLIC KEY"
 while true; do
-    HEIGHT1=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT1"/api/loader/status/sync"| jq '.height')
+    HEIGHT1=$(curl --connect-timeout 2 -s "http://"$SRV1""$PRT1"/api/loader/status/sync"| jq '.height')
     if [[ -z "$HEIGHT1" ]];
     then
-        HEIGHT1=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT1"/api/loader/status/sync"| jq '.height')
+        HEIGHT1=$(curl --connect-timeout 2 -s "http://"$SRV1""$PRT1"/api/loader/status/sync"| jq '.height')
     fi
-    HEIGHT2=$(curl --connect-timeout 3 -s "http://"$SRV2""$PRT2"/api/loader/status/sync"| jq '.height')
+    HEIGHT2=$(curl --connect-timeout 2 -s "http://"$SRV2""$PRT2"/api/loader/status/sync"| jq '.height')
     if [[ -z "$HEIGHT2" ]];
     then
-        HEIGHT2=$(curl --connect-timeout 3 -s "http://"$SRV2""$PRT2"/api/loader/status/sync"| jq '.height')
+        HEIGHT2=$(curl --connect-timeout 2 -s "http://"$SRV2""$PRT2"/api/loader/status/sync"| jq '.height')
     fi
-    HEIGHT3=$(curl --connect-timeout 3 -s "http://"$SRV3""$PRT3"/api/loader/status/sync"| jq '.height')
+    HEIGHT3=$(curl --connect-timeout 2 -s "http://"$SRV3""$PRT3"/api/loader/status/sync"| jq '.height')
     if [[ -z "$HEIGHT3" ]];
     then
-        HEIGHT3=$(curl --connect-timeout 3 -s "http://"$SRV3""$PRT3"/api/loader/status/sync"| jq '.height')
+        HEIGHT3=$(curl --connect-timeout 2 -s "http://"$SRV3""$PRT3"/api/loader/status/sync"| jq '.height')
     fi
     
     ## Check if any servers are off
@@ -67,20 +67,42 @@ while true; do
     fi
     
     ## Get forging status of servers
-    FORGE1=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+    FORGE1=$(curl --connect-timeout 2 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
     if [[ -z "$FORGE1" ]];
     then
-        FORGE1=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+        FORGE1=$(curl --connect-timeout 2 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
     fi
-    FORGE2=$(curl --connect-timeout 3 -s "http://"$SRV2""$PRT2"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+    FORGE2=$(curl --connect-timeout 2 -s "http://"$SRV2""$PRT2"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
     if [[ -z "$FORGE2" ]];
     then
-        FORGE2=$(curl --connect-timeout 3 -s "http://"$SRV2""$PRT2"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+        FORGE2=$(curl --connect-timeout 2 -s "http://"$SRV2""$PRT2"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
     fi
-    FORGE3=$(curl --connect-timeout 3 -s "http://"$SRV3""$PRT3"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+    FORGE3=$(curl --connect-timeout 2 -s "http://"$SRV3""$PRT3"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
     if [[ -z "$FORGE3" ]];
     then
-        FORGE3=$(curl --connect-timeout 3 -s "http://"$SRV3""$PRT3"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+        FORGE3=$(curl --connect-timeout 2 -s "http://"$SRV3""$PRT3"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+    fi
+    
+    ## If none reported forging, wait 1 second and double check
+    if [ "$FORGE1" != "true"  ] && [ "$FORGE2" != "true" ] && [ "$FORGE3" != "true" ];
+    then
+    	sleep 1
+    	 ## Get forging status of servers
+		FORGE1=$(curl --connect-timeout 2 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+		if [[ -z "$FORGE1" ]];
+		then
+			FORGE1=$(curl --connect-timeout 2 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+		fi
+		FORGE2=$(curl --connect-timeout 2 -s "http://"$SRV2""$PRT2"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+		if [[ -z "$FORGE2" ]];
+		then
+			FORGE2=$(curl --connect-timeout 2 -s "http://"$SRV2""$PRT2"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+		fi
+		FORGE3=$(curl --connect-timeout 2 -s "http://"$SRV3""$PRT3"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+		if [[ -z "$FORGE3" ]];
+		then
+			FORGE3=$(curl --connect-timeout 2 -s "http://"$SRV3""$PRT3"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+		fi
     fi
     
     ## Display status of servers
