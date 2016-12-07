@@ -32,6 +32,7 @@ PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
 #---------------------------------------------------------------------------
 # Looping while node is building blockchain 
+# from Nerigal
 function SyncState()
 {
 	result='true'
