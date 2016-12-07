@@ -46,6 +46,8 @@ find_newest_snap_rebuild(){
 	BESTSNAPLENGTH=0
 	
 	BESTSNAP2=""
+	BESTTIMESTAMP=0
+	BESTSNAPLENGTH=0
 
 	for SNAP in ${SNAPSHOTS[@]}
 	do
@@ -62,21 +64,30 @@ find_newest_snap_rebuild(){
 	  then
 		  TIME=$(curl -sI "$SNAP" | grep Last-Modified | cut -f2 -d:)
 		  TIMESTAMP=$(date -d "$TIME" +"%s")
-		  echo $TIMESTAMP
+		  echo "Timestamp: $TIMESTAMP - Size: $SNAPLENGTH"
 		  if [ "$TIMESTAMP" -gt "$BESTTIMESTAMP" ] && [ "$SNAPLENGTH" -gt "$BESTSNAPLENGTH" ]; ## Make sure it is the newest and the largest
 		  then
 		  	 ## Save previous best snap as the other choice
 			 BESTSNAP2=$BESTSNAP
+			 BESTTIMESTAMP2=$BESTTIMESTAMP
+			 BESTSNAPLENGTH2=$BESTSNAPLENGTH
 			 
 			 BESTSNAP=$SNAP
 			 BESTTIMESTAMP=$TIMESTAMP
 			 BESTSNAPLENGTH=$SNAPLENGTH
+		  elif [ "$TIMESTAMP" -gt "$BESTTIMESTAMP2" ] && [ "$SNAPLENGTH" -gt "$BESTSNAPLENGTH2" ]; ## Make sure the 2nd is the newest and the largest
+		  then	 
+		  	 BESTSNAP2=$SNAP
+			 BESTTIMESTAMP2=$TIMESTAMP
+			 BESTSNAPLENGTH2=$SNAPLENGTH
 		  fi
+		  echo "Current Best Snap: $BESTSNAP | Previously: $BESTSNAP2" ## Debugging
+		  echo ""
 	   fi
 	done
     
     ## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
-    WHICHSNAP = $((1 + RANDOM % 2))
+    WHICHSNAP=$((1 + RANDOM % 2))
     
     if [ "$WHICHSNAP" -eq "1" ];
     then
