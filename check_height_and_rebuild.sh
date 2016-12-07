@@ -29,6 +29,21 @@ LOGS_DIR="$(pwd)/logs"
 PIDS_DIR="$(pwd)/pids"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
+
+#---------------------------------------------------------------------------
+# Looping while node is building blockchain 
+function SyncState()
+{
+	result='true'
+	while [ $result == 'true' ]
+	do
+	 result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
+	 sleep 2
+    done
+}
+#---------------------------------------------------------------------------
+
+
 ## Thanks to cc001 and hagie for improvements here
 find_newest_snap_rebuild(){
 
@@ -143,6 +158,7 @@ local_height() {
 		then
 			echo "Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 			find_newest_snap_rebuild
+			SyncState
 			#sleep 420
 			## Thank you corsaro for this improvement
 			while true; do
