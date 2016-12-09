@@ -45,75 +45,62 @@ function SyncState()
 #---------------------------------------------------------------------------
 
 
-## Thanks to cc001 and hagie for improvements here
+## Thanks to cc001 and hagie for improvements here and cc001 for comparing blocks instead of size and timestamp
 find_newest_snap_rebuild(){
 
 	SNAPSHOTS=(
-	  https://downloads.lisk.io/lisk/main/blockchain.db.gz	## Official
-	  https://snapshot.liskwallet.net/blockchain.db.gz		## isabella
-	  https://snapshot.lisknode.io/blockchain.db.gz			## Gr33nDrag0n
-	  https://lisktools.io/backups/blockchain.db.gz			## MrV
-	  https://snapshot.punkrock.me/blockchain.db.gz			## punkrock
-	  https://snap.lsknode.org/blockchain.db.gz				## redsn0w
+	  https://downloads.lisk.io/lisk/main		## Official
+	  https://snapshot.liskwallet.net			## isabella
+	  https://snapshot.lisknode.io				## Gr33nDrag0n
+	  https://lisktools.io/backups/index.php	## MrV
+	  https://snapshot.punkrock.me				## punkrock
+	  https://snap.lsknode.org					## redsn0w
 	)
+	
+	MATCHER="lisk_main_backup-[0-9]*\.gz"
 
 	BESTSNAP=""
-	BESTTIMESTAMP=0
-	BESTSNAPLENGTH=0
+	BESTSNAPBLOCK=0
 	
 	BESTSNAP2=""
-	BESTTIMESTAMP=0
-	BESTSNAPLENGTH=0
-
-	for SNAP in ${SNAPSHOTS[@]}
+	BESTSNAPBLOCK2=0
+	
+	for SNAPSHOT in ${SNAPSHOTS[@]}
 	do
-	  echo "$SNAP"
-	  SNAPSTATUS=$(curl -sI "$SNAP" | grep "HTTP" | cut -f2 -d" ")
-	  ## Check that we got a number for comparison later
-	  if [[  -z "$SNAPSTATUS" ]];
-		then
-			SNAPSTATUS="999"
-		fi
-	  SNAPLENGTH=$(curl -sI "$SNAP" | grep "Length" | cut -f2 -d" ")
-	  SNAPLENGTH="${SNAPLENGTH//[$'\t\r\n ']}"
-	  if [ "$SNAPSTATUS" -eq "200" ]
+	  BACKUP=`curl -s $SNAPSHOT | grep -o "$MATCHER" | sort | tail -n 1`
+	  BLOCK=`echo $BACKUP | grep -oh "[0-9]*"`
+	  echo "$SNAPSHOT"
+	  echo "$BLOCK"
+	  if [ -z "$BLOCK" ];
 	  then
-		  TIME=$(curl -sI "$SNAP" | grep Last-Modified | cut -f2 -d:)
-		  TIMESTAMP=$(date -d "$TIME" +"%s")
-		  echo "Timestamp: $TIMESTAMP - Size: $SNAPLENGTH"
-		  if [ "$TIMESTAMP" -gt "$BESTTIMESTAMP" ] && [ "$SNAPLENGTH" -gt "$BESTSNAPLENGTH" ]; ## Make sure it is the newest and the largest
+	  	echo "Couldn't locate block number"
+	  else
+		  if [ "$BLOCK" -gt "$BESTSNAPBLOCK" ];
 		  then
-		  	 ## Save previous best snap as the other choice
-			 BESTSNAP2=$BESTSNAP
-			 BESTTIMESTAMP2=$BESTTIMESTAMP
-			 BESTSNAPLENGTH2=$BESTSNAPLENGTH
-			 
-			 BESTSNAP=$SNAP
-			 BESTTIMESTAMP=$TIMESTAMP
-			 BESTSNAPLENGTH=$SNAPLENGTH
-		  elif [ "$TIMESTAMP" -gt "$BESTTIMESTAMP2" ] && [ "$SNAPLENGTH" -gt "$BESTSNAPLENGTH2" ]; ## Make sure the 2nd is the newest and the largest
+			BESTSNAPBLOCK2=$BESTSNAPBLOCK
+			BESTSNAP2=$BESTSNAP
+		
+			BESTSNAPBLOCK=$BLOCK
+			BESTSNAP=$SNAPSHOT
+		  elif [ "$BLOCK" -gt "$BESTSNAPBLOCK2" ]; ## Check if the second is newer
 		  then	 
-		  	 BESTSNAP2=$SNAP
-			 BESTTIMESTAMP2=$TIMESTAMP
-			 BESTSNAPLENGTH2=$SNAPLENGTH
+		  	 BESTSNAPBLOCK2=$BLOCK
+			 BESTSNAP2=$SNAPSHOT
 		  fi
-		  echo "Current Best Snap: $BESTSNAP | Previously: $BESTSNAP2" ## Debugging
-		  echo ""
-	   fi
+	  fi
+	  echo ""
 	done
-    
-    ## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
+	
+	## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
     WHICHSNAP=$((1 + RANDOM % 2))
     
     if [ "$WHICHSNAP" -eq "1" ];
     then
-    	REPO=${BESTSNAP%/blockchain.db.gz}
-		echo "Newest snap: $BESTSNAP | Rebuilding from $REPO"
-    	bash lisk.sh rebuild -u $REPO
+		echo "Newest snap: $BESTSNAP at block: $BESTSNAPBLOCK"
+    	bash lisk.sh rebuild -u $BESTSNAP
     else
-    	REPO=${BESTSNAP2%/blockchain.db.gz}
-		echo "Newest snap: $BESTSNAP2 | Rebuilding from $REPO"
-    	bash lisk.sh rebuild -u $REPO
+		echo "Newest snap: $BESTSNAP2 at block: $BESTSNAPBLOCK2"
+    	bash lisk.sh rebuild -u $BESTSNAP2
     fi
 }
 
