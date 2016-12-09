@@ -18,16 +18,17 @@ while true; do
 		if [[ -n "$LASTLINE" ]]
 		then
 			HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.height')
+			CONSENSUS=$(curl --connect-timeout 2 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.consensus')
 			echo "WARNING: $LASTLINE"
 		
-			## Make sure second server is not more than 3 blocks behind this server and if not, then switch
+			## Make sure second server is not more than 3 blocks behind this server and consensus is good, then switch
 			if [[  -n "$HEIGHT" ]];
 			then
 				diff=$(( $HEIGHTLOCAL - $HEIGHT ))
 			else
 				diff="999"
 			fi
-			if [[ "$diff" -lt "3" ]]
+			if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "50" ]; 
 			then
 				curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 				curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV2""$PRTS"/api/delegates/forging/enable
@@ -37,6 +38,7 @@ while true; do
 			elif [[  -n "$SRV3" ]] ## If a third server is set, try that one
 			then
 				HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV3":8000/api/loader/status/sync"| jq '.height')
+				CONSENSUS=$(curl --connect-timeout 2 -s "http://"$SRV3":8000/api/loader/status/sync"| jq '.consensus')
 
 				if [[  -n "$HEIGHT" ]];
 				then
@@ -44,14 +46,18 @@ while true; do
 				else
 					diff="999"
 				fi
-				if [[ "$diff" -lt "3" ]]
+				if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "50" ]; 
 				then
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV3""$PRTS"/api/delegates/forging/enable
 					echo
 					echo "Switching to Server 3 to try and forge"
 					## sleep 2 ## Shouldn't be needed any longer since we check forging status at start
+				else
+					echo "No better server to switch to"
 				fi
+			else
+				echo "No better server to switch to"
 			fi
 		fi
 		(( ++TXTDELAY ))
