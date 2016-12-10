@@ -4,8 +4,8 @@
 ## Current snapshot sources and creation times
 ## 00:00 & 12:00 UTC (isabella)
 ## ----- & 15:00 UTC (punkrock)
-## 05:00 & 17:00 UTC (Gr33nDrag0n)
-## 09:00 & 21:00 UTC (MrV)
+## 01:00, 05:00, 09:00, 13:00, 17:00, 21:00 UTC (Gr33nDrag0n)
+## 03:00, 07:00, 11:00, 15:00, 19:00, 23:00 UTC (MrV)
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
@@ -20,15 +20,6 @@ fi
 SRV=127.0.0.1:8000
 
 cd ~/lisk-main/  ## Set to your lisk directory if different
-
-## Copied from lisk.sh
-LISK_CONFIG=config.json
-DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
-LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
-LOGS_DIR="$(pwd)/logs"
-PIDS_DIR="$(pwd)/pids"
-PID_FILE="$PIDS_DIR/$DB_NAME.pid"
-
 
 #---------------------------------------------------------------------------
 # Looping while node is building blockchain 
@@ -177,44 +168,17 @@ local_height() {
 		fi
 	fi
 }
-
-## Copied from lisk.sh
-check_status() {
-  if [ -f "$PID_FILE" ]; then
-    PID="$(cat "$PID_FILE")"
-  fi
-  if [ ! -z "$PID" ]; then
-    ps -p "$PID" > /dev/null 2>&1
-    STATUS=$?
-  else
-    STATUS=1
-  fi
-  if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
-    ## echo "√ Lisk is running as PID: $PID"
-    return 0
-  else
-    echo "X Lisk is not running."
-    return 1
-  fi
-}
-start_lisk() {
-  if check_status == 1 &> /dev/null; then
-    check_status
-    ##exit 1
-  else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
-    if [ $? == 0 ]; then
-      echo "√ Lisk started successfully."
-    else
-      echo "X Failed to start Lisk."
-      exit 1
-    fi
-  fi
-}
-
+cd ~/lisk-main/  ## Set to your lisk directory if different
 while true; do
 	## Check that lisk is running first!!
-	start_lisk
+	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+	if [[ -z "$STATUS" ]];
+	then
+		bash lisk.sh stop
+		sleep 2 
+		bash lisk.sh start
+		sleep 2
+	fi
 	
 	top_height
 	local_height
