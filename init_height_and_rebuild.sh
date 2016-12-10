@@ -41,7 +41,7 @@ case $1 in
 		touch "$LOG_FILE"
 	fi
 	if [[ ! -e "$SH_FILE" ]] ; then
-		wget "https://lisktools.io/backups/check_height_and_rebuild.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
 	fi
 	
 	check_running
@@ -60,7 +60,7 @@ case $1 in
 		rm "$SH_FILE"
 	fi
 	
-	wget "https://lisktools.io/backups/check_height_and_rebuild.sh"
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
 	echo "Starting Script"
 	nohup bash $SH_FILE -S $SRV  > $LOG_FILE 2>&1&
 ;;
