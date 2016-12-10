@@ -29,9 +29,15 @@ function SyncState()
 	result='true'
 	while [ $result == 'true' ]
 	do
-	 result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
-	 sleep 2
+		echo "Blockchain syncing"
+		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
+		sleep 2
     done
+    echo "Looks like rebuilding finished."
+	if [[ -z "$SECRET" ]];
+	then
+		curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
+	fi
 }
 #---------------------------------------------------------------------------
 
@@ -137,28 +143,29 @@ local_height() {
 		then
 			echo "Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 			find_newest_snap_rebuild
+			sleep 30
 			SyncState
 			#sleep 420
 			## Thank you corsaro for this improvement
-			while true; do
-				s1=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
-				sleep 30
-				s2=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
+			## while true; do
+			## 	s1=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
+			## 	sleep 30
+			## 	s2=`curl -k -s "http://$SRV/api/loader/status/sync"| jq '.height'`
 
-				diff=$(( $s2 - $s1 ))
-				if [ "$diff" -gt "5" ];
-				then
-					echo "$s2" "is a lot greater then " "$s1"
-					echo "It looks like rebuild has not finished yet. Waiting longer to continue"
-				else
-					echo "" "$s1" " " "$s2"
-					echo "Looks like rebuilding finished. We can stop this"
-					if [[ -z "$SECRET" ]];
-					then
-						curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
-					fi
-					break
-				fi
+			## 	diff=$(( $s2 - $s1 ))
+			## 	if [ "$diff" -gt "5" ];
+			## 	then
+			## 		echo "$s2" "is a lot greater then " "$s1"
+			## 		echo "It looks like rebuild has not finished yet. Waiting longer to continue"
+			## 	else
+			## 		echo "" "$s1" " " "$s2"
+			## 		echo "Looks like rebuilding finished. We can stop this"
+			## 		if [[ -z "$SECRET" ]];
+			## 		then
+			## 			curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
+			## 		fi
+			## 		break
+			## 	fi
 			done
 		else
 			if [[ -z "$SECRET" ]];
