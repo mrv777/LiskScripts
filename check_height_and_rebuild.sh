@@ -166,7 +166,7 @@ local_height() {
 			## 		fi
 			## 		break
 			## 	fi
-			done
+			## done
 		else
 			if [[ -z "$SECRET" ]];
 			then
