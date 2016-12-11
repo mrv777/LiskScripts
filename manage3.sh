@@ -1,4 +1,5 @@
-##  original script from corsaro. Modified by liberspirita. Modified my MrV
+## Original script from corsaro. Modified by liberspirita. Modified my MrV
+## Version 0.8.0
 ####################################################
 ## MrV modifications are :
 ## SRV1 is no longer preferred
