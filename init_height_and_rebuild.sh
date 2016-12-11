@@ -1,4 +1,5 @@
 ## init_height_and_rebuild.sh
+## Version 0.8.0
 ## get newest check_height_and_rebuild.sh and run it
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## DISCLAIMER: nodes sometimes rebuild from block 1 with this, not sure why yet
@@ -41,7 +42,7 @@ case $1 in
 		touch "$LOG_FILE"
 	fi
 	if [[ ! -e "$SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_height_and_rebuild.sh"
 	fi
 	
 	check_running
@@ -60,7 +61,7 @@ case $1 in
 		rm "$SH_FILE"
 	fi
 	
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_height_and_rebuild.sh"
 	echo "Starting Script"
 	nohup bash $SH_FILE -S $SRV  > $LOG_FILE 2>&1&
 ;;
