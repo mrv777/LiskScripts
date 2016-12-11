@@ -1,3 +1,4 @@
+## Version 0.8.0
 #!/bin/bash
 SECRET="\"YOUR PASSPHRASE\""
 SRV1="localhost"
