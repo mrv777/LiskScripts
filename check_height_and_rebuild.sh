@@ -1,4 +1,5 @@
 ## check_height_and_rebuild.sh
+## Version 0.8.0
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## 
 ## Current snapshot sources and creation times
