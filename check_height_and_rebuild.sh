@@ -20,7 +20,11 @@ fi
 ##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to reenable forging when done
 SRV=127.0.0.1:8000
 
-cd ~/lisk-main/  ## Set to your lisk directory if different
+## Make sure we are in the correct directory (corsaro suggestion)
+function ChangeDirectory(){
+	cd ~
+	cd ~/lisk-main  ## Set to your lisk directory if different
+}
 
 #---------------------------------------------------------------------------
 # Looping while node is building blockchain 
@@ -33,8 +37,9 @@ function SyncState()
 		echo "Blockchain syncing"
 		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
 		sleep 2
-    done
-    echo "Looks like rebuilding finished."
+	done
+	
+	echo "Looks like rebuilding finished."
 	if [[ -z "$SECRET" ]];
 	then
 		curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
@@ -90,16 +95,17 @@ find_newest_snap_rebuild(){
 	done
 	
 	## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
-    WHICHSNAP=$((1 + RANDOM % 2))
-    
-    if [ "$WHICHSNAP" -eq "1" ];
-    then
+	WHICHSNAP=$((1 + RANDOM % 2))
+    	
+	ChangeDirectory ## Make sure we are in the correct directory
+	if [ "$WHICHSNAP" -eq "1" ];
+	then
 		echo "Newest snap: $BESTSNAP at block: $BESTSNAPBLOCK"
-    	bash lisk.sh rebuild -u $BESTSNAP
-    else
+    		bash lisk.sh rebuild -u $BESTSNAP
+	else
 		echo "Newest snap: $BESTSNAP2 at block: $BESTSNAPBLOCK2"
-    	bash lisk.sh rebuild -u $BESTSNAP2
-    fi
+    		bash lisk.sh rebuild -u $BESTSNAP2
+	fi
 }
 
 top_height(){
@@ -109,9 +115,9 @@ top_height(){
 	## Make sure height is not empty, if it is empty try the call until it is not empty
 	while [ -z "$HEIGHT" ]
 	do
-    	sleep 1
-    	HEIGHT=$(curl -s http://$SRV/api/peers | jq '.peers[].height' | sort -nu | tail -n1)
-    done
+		sleep 1
+    		HEIGHT=$(curl -s http://$SRV/api/peers | jq '.peers[].height' | sort -nu | tail -n1)
+    	done
 }
 
 ## Get height of this server and see if it's greater or within 4 of the highest
@@ -126,7 +132,8 @@ local_height() {
 	diff=$(( $HEIGHT - $CHECKSRV ))
 	if [ "$diff" -gt "4" ]
 	then
-        echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+        	echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+		ChangeDirectory ## Make sure we are in the correct directory
 		bash lisk.sh reload
 		sleep 60
 		
