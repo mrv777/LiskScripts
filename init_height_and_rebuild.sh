@@ -1,4 +1,5 @@
 ## init_height_and_rebuild.sh
+## Version 0.8.0
 ## get newest check_height_and_rebuild.sh and run it
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## DISCLAIMER: nodes sometimes rebuild from block 1 with this, not sure why yet

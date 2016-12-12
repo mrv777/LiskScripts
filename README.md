@@ -1,7 +1,7 @@
 # Lisk Delegate Scripts  (BETA)
 
 ## Thank you
-Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, and anyone I might have missed for their help and/or contributions.
+Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, Nerigal, and anyone I might have missed for their help and/or contributions.
 
 ## My consensus check script
 
