@@ -30,9 +30,9 @@ do
 			for SERVER in ${SERVERS[@]}
 			do
 				## Get next server's height and consensus
-				SERVER=$(curl --connect-timeout 3 -s "http://"$SERVER""$PRT"/api/loader/status/sync")
-				HEIGHT=$( echo "$SERVER" | jq '.height')
-				CONSENSUS=$( echo "$SERVER" | jq '.consensus')
+				SERVERINFO=$(curl --connect-timeout 3 -s "http://"$SERVER""$PRT"/api/loader/status/sync")
+				HEIGHT=$( echo "$SERVERINFO" | jq '.height')
+				CONSENSUS=$( echo "$SERVERINFO" | jq '.consensus')
 				
 				## Make sure next server is not more than 3 blocks behind this server and consensus is better, then switch
 				if [[  -n "$HEIGHT" ]];
@@ -46,7 +46,7 @@ do
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 					echo
-					echo "Switching to Server 2 to try and forge"
+					echo "Switching to Server $SERVER to try and forge"
 					break
 				fi
 			done
