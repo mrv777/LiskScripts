@@ -16,6 +16,7 @@ while true; do
 	then
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
 		HEIGHTLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1":8000/api/loader/status/sync"| jq '.height')
+		CONSENSUSLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1":8000/api/loader/status/sync"| jq '.consensus')
 		if [[ -n "$LASTLINE" ]]
 		then
 			HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.height')
@@ -47,7 +48,7 @@ while true; do
 				else
 					diff="999"
 				fi
-				if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "50" ]; 
+				if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "$CONSENSUSLOCAL" ]; 
 				then
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV3""$PRTS"/api/delegates/forging/enable
