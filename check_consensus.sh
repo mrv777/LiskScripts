@@ -18,14 +18,16 @@ do
 	FORGE=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		## Get current server's height and consensus
+		SERVERLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
+		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
+		CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
+		
+		## Check log for Inadequate consensus
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
 		if [[ -n "$LASTLINE" ]]
 		then
 			echo "WARNING: $LASTLINE"
-			## Get current server's height and consensus
-			SERVERLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
-			HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
-			CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
 		
 			for SERVER in ${SERVERS[@]}
 			do
