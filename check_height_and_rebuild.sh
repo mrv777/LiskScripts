@@ -191,8 +191,9 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
+		echo "WARNING: Lisk does not seem to be running.  Trying a stop and start"
 		bash lisk.sh stop
-		sleep 2 
+		sleep 2
 		bash lisk.sh start
 		sleep 2
 	fi
