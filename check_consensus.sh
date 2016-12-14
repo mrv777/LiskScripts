@@ -48,7 +48,7 @@ do
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 					echo
-					echo "Switching to Server $SERVER to try and forge"
+					echo "Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge"
 					break
 				fi
 			done
