@@ -132,6 +132,7 @@ local_height() {
 	diff=$(( $HEIGHT - $CHECKSRV ))
 	if [ "$diff" -gt "4" ]
 	then
+		## Thank you doweig for better output formating
         	echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 		ChangeDirectory ## Make sure we are in the correct directory
 		bash lisk.sh reload
@@ -149,6 +150,7 @@ local_height() {
 		diff=$(( $HEIGHT - $CHECKSRV ))
 		if [ "$diff" -gt "6" ]
 		then
+			## Thank you doweig for better output formating
 			echo "Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 			find_newest_snap_rebuild
 			sleep 30
@@ -198,6 +200,7 @@ while true; do
 	top_height
 	local_height
 
+	## Thank you doweig for better output formating
 	echo "Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 	sleep 10
 done
