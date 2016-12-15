@@ -135,7 +135,7 @@ local_height() {
 		##ChangeDirectory ## Make sure we are in the correct directory
 		##bash lisk.sh reload  # 0.5.1 often solves short stucks by itself
 		date +"%Y-%m-%d %H:%M:%S || Sleeping for 140 seconds to wait for autocorrect! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
-		sleep 140  #normally a short stuck is solved by itself in less then 140 seconds
+		sleep 140  #normally a short stuck is solved by itself in less then 140 seconds | by corsaro
 		
 		## Make sure local height is not empty, if it is empty try the call until it is not empty
 		CHECKSRV=`curl -s "http://$SRV/api/loader/status/sync"| jq '.height'`
