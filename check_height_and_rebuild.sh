@@ -90,7 +90,6 @@ find_newest_snap_rebuild(){
 			 BESTSNAP2=$SNAPSHOT
 		  fi
 	  fi
-	  echo ""
 	done
 	
 	## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
