@@ -107,7 +107,7 @@ while true; do
     fi
     
     ## Display status of servers
-    echo
+    date +"%Y-%m-%d %H:%M:%S"
     echo $SRV1 " " $HEIGHT1 " " $FORGE1
     echo $SRV2 " " $HEIGHT2 " " $FORGE2
     echo $SRV3 " " $HEIGHT3 " " $FORGE3
