@@ -72,8 +72,7 @@ find_newest_snap_rebuild(){
 	do
 	  BACKUP=`curl -s -L $SNAPSHOT | grep -o "$MATCHER" | sort | tail -n 1`
 	  BLOCK=`echo $BACKUP | grep -oh "[0-9]*"`
-	  echo "$SNAPSHOT"
-	  echo "$BLOCK"
+	  date +"%Y-%m-%d %H:%M:%S || $SNAPSHOT | Block height: $BLOCK"
 	  if [ -z "$BLOCK" ];
 	  then
 	  	date +"%Y-%m-%d %H:%M:%S || Couldn't locate block number"
