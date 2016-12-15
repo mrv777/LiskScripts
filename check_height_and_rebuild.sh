@@ -55,7 +55,7 @@ find_newest_snap_rebuild(){
 	  https://downloads.lisk.io/lisk/main		## Official
 	  https://snapshot.liskwallet.net			## isabella
 	  https://snapshot.lisknode.io				## Gr33nDrag0n
-	  https://lisktools.io/backups/index.php	## MrV
+	  https://lisktools.io/backups				## MrV
 	  https://snapshot.punkrock.me				## punkrock
 	  https://snap.lsknode.org					## redsn0w
 	)
@@ -135,8 +135,8 @@ local_height() {
 		## Thank you doweig for better output formating
         	date +"%Y-%m-%d %H:%M:%S || Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 		ChangeDirectory ## Make sure we are in the correct directory
-		bash lisk.sh reload
-		sleep 60
+	##	bash lisk.sh reload  # 0.5.1 often solves short stucks by itself
+		sleep 140  #normally a quick stuck is solved by itself in less then 140 seconds
 		
 		## Make sure local height is not empty, if it is empty try the call until it is not empty
 		CHECKSRV=`curl -s "http://$SRV/api/loader/status/sync"| jq '.height'`
