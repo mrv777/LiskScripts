@@ -27,7 +27,7 @@ do
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
 		if [[ -n "$LASTLINE" ]]
 		then
-			echo "WARNING: $LASTLINE"
+			date +"%Y-%m-%d %H:%M:%S || WARNING: $LASTLINE"
 		
 			for SERVER in ${SERVERS[@]}
 			do
@@ -48,7 +48,7 @@ do
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 					echo
-					echo "Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge"
+					date +"%Y-%m-%d %H:%M:%S || Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge"
 					break
 				fi
 			done
@@ -56,7 +56,7 @@ do
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
 		then
-			echo "Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL"
+			date +"%Y-%m-%d %H:%M:%S || Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL"
 			TXTDELAY=0
 		fi
 			sleep 1
@@ -64,7 +64,7 @@ do
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
 		then
-			echo "This server is not forging"
+			date +"%Y-%m-%d %H:%M:%S || This server is not forging"
 			TXTDELAY=0
 		fi
 			sleep 1
