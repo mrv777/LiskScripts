@@ -52,12 +52,12 @@ function SyncState()
 find_newest_snap_rebuild(){
 
 	SNAPSHOTS=(
-	  https://downloads.lisk.io/lisk/main		## Official
+	  https://downloads.lisk.io/lisk/main			## Official
 	  https://snapshot.liskwallet.net			## isabella
 	  https://snapshot.lisknode.io				## Gr33nDrag0n
-	  https://lisktools.io/backups/index.php	## MrV
+	  https://lisktools.io/backups				## MrV
 	  https://snapshot.punkrock.me				## punkrock
-	  https://snap.lsknode.org					## redsn0w
+	  https://snap.lsknode.org				## redsn0w
 	)
 	
 	MATCHER="lisk_main_backup-[0-9]*\.gz"
@@ -70,7 +70,7 @@ find_newest_snap_rebuild(){
 	
 	for SNAPSHOT in ${SNAPSHOTS[@]}
 	do
-	  BACKUP=`curl -s $SNAPSHOT | grep -o "$MATCHER" | sort | tail -n 1`
+	  BACKUP=`curl -s -L $SNAPSHOT | grep -o "$MATCHER" | sort | tail -n 1`
 	  BLOCK=`echo $BACKUP | grep -oh "[0-9]*"`
 	  echo "$SNAPSHOT"
 	  echo "$BLOCK"
