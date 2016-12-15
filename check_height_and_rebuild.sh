@@ -34,12 +34,12 @@ function SyncState()
 	result='true'
 	while [ $result == 'true' ]
 	do
-		echo "Blockchain syncing"
+		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
 		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
 		sleep 2
 	done
 	
-	echo "Looks like rebuilding finished."
+	date +"%Y-%m-%d %H:%M:%S || Looks like rebuilding finished."
 	if [[ -n "$SECRET" ]];
 	then
 		curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
@@ -76,7 +76,7 @@ find_newest_snap_rebuild(){
 	  echo "$BLOCK"
 	  if [ -z "$BLOCK" ];
 	  then
-	  	echo "Couldn't locate block number"
+	  	date +"%Y-%m-%d %H:%M:%S || Couldn't locate block number"
 	  else
 		  if [ "$BLOCK" -gt "$BESTSNAPBLOCK" ];
 		  then
@@ -100,10 +100,10 @@ find_newest_snap_rebuild(){
 	ChangeDirectory ## Make sure we are in the correct directory
 	if [ "$WHICHSNAP" -eq "1" ];
 	then
-		echo "Newest snap: $BESTSNAP at block: $BESTSNAPBLOCK"
+		date +"%Y-%m-%d %H:%M:%S || Newest snap: $BESTSNAP at block: $BESTSNAPBLOCK"
     		bash lisk.sh rebuild -u $BESTSNAP
 	else
-		echo "Newest snap: $BESTSNAP2 at block: $BESTSNAPBLOCK2"
+		date +"%Y-%m-%d %H:%M:%S || Newest snap: $BESTSNAP2 at block: $BESTSNAPBLOCK2"
     		bash lisk.sh rebuild -u $BESTSNAP2
 	fi
 }
@@ -133,7 +133,7 @@ local_height() {
 	if [ "$diff" -gt "4" ]
 	then
 		## Thank you doweig for better output formating
-        	echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+        	date +"%Y-%m-%d %H:%M:%S || Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 		ChangeDirectory ## Make sure we are in the correct directory
 		bash lisk.sh reload
 		sleep 60
@@ -151,7 +151,7 @@ local_height() {
 		if [ "$diff" -gt "6" ]
 		then
 			## Thank you doweig for better output formating
-			echo "Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+			date +"%Y-%m-%d %H:%M:%S || Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 			find_newest_snap_rebuild
 			sleep 30
 			SyncState
@@ -191,7 +191,7 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
-		echo "WARNING: Lisk does not seem to be running.  Trying a stop and start"
+		date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
 		bash lisk.sh stop
 		sleep 2
 		bash lisk.sh start
@@ -202,6 +202,6 @@ while true; do
 	local_height
 
 	## Thank you doweig for better output formating
-	echo "Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+	date +"%Y-%m-%d %H:%M:%S || Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 	sleep 10
 done
