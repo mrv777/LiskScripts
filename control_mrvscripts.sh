@@ -48,6 +48,7 @@ start_consensus() {
 	fi
 	if [[ ! -e "$CONSENSUS_SH_FILE" ]] ; then
 		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
+		vi check_consensus.sh
 	fi
 	
 	echo "Starting consensus Script"
@@ -72,6 +73,7 @@ upgrade_consensus() {
 	fi
 	
 	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
+	vi check_consensus.sh
 	echo "Starting consensus Script"
 	nohup bash $CONSENSUS_SH_FILE -S $SRV  > $CONSENSUS_SH_FILE 2>&1&
 }
