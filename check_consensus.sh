@@ -32,7 +32,7 @@ do
 			for SERVER in ${SERVERS[@]}
 			do
 				## Get next server's height and consensus
-				SERVERINFO=$(curl --connect-timeout 3 -s "http://"$SERVER""$PRT"/api/loader/status/sync")
+				SERVERINFO=$(curl --connect-timeout 3 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
 				HEIGHT=$( echo "$SERVERINFO" | jq '.height')
 				CONSENSUS=$( echo "$SERVERINFO" | jq '.consensus')
 				
@@ -46,8 +46,8 @@ do
 				## if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "$CONSENSUSLOCAL" ]; ## Removed for now as I believe consensus read from API isn't updated every second to be fully accurate
 				if [ "$diff" -lt "3" ]; 
 				then
-					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
-					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
+					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
+					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 					echo
 					date +"%Y-%m-%d %H:%M:%S || Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge"
 					break
