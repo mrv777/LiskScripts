@@ -32,7 +32,7 @@ function ChangeDirectory(){
 function SyncState()
 {
 	result='true'
-	while [ $result == 'true' ]
+	while [ $result != 'false' ]
 	do
 		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
 		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
