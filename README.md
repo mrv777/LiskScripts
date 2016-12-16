@@ -1,4 +1,4 @@
-# Lisk Delegate Scripts  (BETA)
+# Lisk Delegate Scripts  (BETA v0.9)
 
 ## Thank you
 Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
