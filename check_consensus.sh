@@ -1,70 +1,63 @@
-## Version 0.8.0
+## Version 0.9.0
 #!/bin/bash
 SECRET="\"YOUR PASSPHRASE\""
 SRV1="localhost"
-SRV2="xxx.xxx.xxx.xxx"
-SRV3=""			# Leave blank if only using 2 servers
-PRT1=":8000" 	# 7000 on testnet, 8000 on mainnet
-PRTS=":2443"	# port used on https
+PRT=":8000" 			# 7000 on testnet, 8000 on mainnet
+PRTS=":2443"			# https port used to send secret
 pbk="YOUR PUBLIC KEY"
+SERVERS=(			# Array of servers to check in order
+	  xxx.xxx.xxx.xxx
+	  xxx.xxx.xxx.xxx
+	  ...
+	)
 
 TXTDELAY=0
-while true; do
+while true;
+do
 	## Get forging status of server
-	FORGE=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT1"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+	FORGE=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		## Get current server's height and consensus
+		SERVERLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
+		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
+		CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
+		
+		## Check log for Inadequate consensus
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
-		HEIGHTLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1":8000/api/loader/status/sync"| jq '.height')
 		if [[ -n "$LASTLINE" ]]
 		then
-			HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.height')
-			CONSENSUS=$(curl --connect-timeout 2 -s "http://"$SRV2":8000/api/loader/status/sync"| jq '.consensus')
-			echo "WARNING: $LASTLINE"
+			date +"%Y-%m-%d %H:%M:%S || WARNING: $LASTLINE"
 		
-			## Make sure second server is not more than 3 blocks behind this server and consensus is good, then switch
-			if [[  -n "$HEIGHT" ]];
-			then
-				diff=$(( $HEIGHTLOCAL - $HEIGHT ))
-			else
-				diff="999"
-			fi
-			if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "50" ]; 
-			then
-				curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
-				curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV2""$PRTS"/api/delegates/forging/enable
-				echo
-				echo "Switching to Server 2 to try and forge"
-				## sleep 2 ## Shouldn't be needed any longer since we check forging status at start
-			elif [[  -n "$SRV3" ]] ## If a third server is set, try that one
-			then
-				HEIGHT=$(curl --connect-timeout 2 -s "http://"$SRV3":8000/api/loader/status/sync"| jq '.height')
-				CONSENSUS=$(curl --connect-timeout 2 -s "http://"$SRV3":8000/api/loader/status/sync"| jq '.consensus')
-
+			for SERVER in ${SERVERS[@]}
+			do
+				## Get next server's height and consensus
+				SERVERINFO=$(curl --connect-timeout 3 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
+				HEIGHT=$( echo "$SERVERINFO" | jq '.height')
+				CONSENSUS=$( echo "$SERVERINFO" | jq '.consensus')
+				
+				## Make sure next server is not more than 3 blocks behind this server and consensus is better, then switch
 				if [[  -n "$HEIGHT" ]];
 				then
 					diff=$(( $HEIGHTLOCAL - $HEIGHT ))
 				else
 					diff="999"
 				fi
-				if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "50" ]; 
+				## if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "$CONSENSUSLOCAL" ]; ## Removed for now as I believe consensus read from API isn't updated every second to be fully accurate
+				if [ "$diff" -lt "3" ]; 
 				then
-					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
-					curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV3""$PRTS"/api/delegates/forging/enable
+					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
+					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 					echo
-					echo "Switching to Server 3 to try and forge"
-					## sleep 2 ## Shouldn't be needed any longer since we check forging status at start
-				else
-					echo "No better server to switch to"
+					date +"%Y-%m-%d %H:%M:%S || Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge"
+					break
 				fi
-			else
-				echo "No better server to switch to"
-			fi
+			done
 		fi
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
 		then
-			echo "Still working at block $HEIGHTLOCAL"
+			date +"%Y-%m-%d %H:%M:%S || Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL"
 			TXTDELAY=0
 		fi
 			sleep 1
@@ -72,7 +65,7 @@ while true; do
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
 		then
-			echo "This server is not forging"
+			date +"%Y-%m-%d %H:%M:%S || This server is not forging"
 			TXTDELAY=0
 		fi
 			sleep 1

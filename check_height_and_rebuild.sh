@@ -1,5 +1,5 @@
 ## check_height_and_rebuild.sh
-## Version 0.8.0
+## Version 0.9.0
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## 
 ## Current snapshot sources and creation times
@@ -32,15 +32,15 @@ function ChangeDirectory(){
 function SyncState()
 {
 	result='true'
-	while [ $result == 'true' ]
+	while [[ -z $result || $result != 'false' ]]
 	do
-		echo "Blockchain syncing"
+		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
 		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
 		sleep 2
 	done
 	
-	echo "Looks like rebuilding finished."
-	if [[ -z "$SECRET" ]];
+	date +"%Y-%m-%d %H:%M:%S || Looks like rebuilding finished."
+	if [[ -n "$SECRET" ]];
 	then
 		curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
 	fi
@@ -52,12 +52,12 @@ function SyncState()
 find_newest_snap_rebuild(){
 
 	SNAPSHOTS=(
-	  https://downloads.lisk.io/lisk/main		## Official
+	  https://downloads.lisk.io/lisk/main			## Official
 	  https://snapshot.liskwallet.net			## isabella
 	  https://snapshot.lisknode.io				## Gr33nDrag0n
-	  https://lisktools.io/backups/index.php	## MrV
+	  https://lisktools.io/backups				## MrV
 	  https://snapshot.punkrock.me				## punkrock
-	  https://snap.lsknode.org					## redsn0w
+	  https://snap.lsknode.org				## redsn0w
 	)
 	
 	MATCHER="lisk_main_backup-[0-9]*\.gz"
@@ -70,13 +70,12 @@ find_newest_snap_rebuild(){
 	
 	for SNAPSHOT in ${SNAPSHOTS[@]}
 	do
-	  BACKUP=`curl -s $SNAPSHOT | grep -o "$MATCHER" | sort | tail -n 1`
+	  BACKUP=`curl -s -L $SNAPSHOT | grep -o "$MATCHER" | sort | tail -n 1`
 	  BLOCK=`echo $BACKUP | grep -oh "[0-9]*"`
-	  echo "$SNAPSHOT"
-	  echo "$BLOCK"
+	  date +"%Y-%m-%d %H:%M:%S || $SNAPSHOT | Block height: $BLOCK"
 	  if [ -z "$BLOCK" ];
 	  then
-	  	echo "Couldn't locate block number"
+	  	date +"%Y-%m-%d %H:%M:%S || Couldn't locate block number"
 	  else
 		  if [ "$BLOCK" -gt "$BESTSNAPBLOCK" ];
 		  then
@@ -91,7 +90,6 @@ find_newest_snap_rebuild(){
 			 BESTSNAP2=$SNAPSHOT
 		  fi
 	  fi
-	  echo ""
 	done
 	
 	## Randomly choose between the best 2 snapshots to prevent everyone downloading from the same source
@@ -100,10 +98,10 @@ find_newest_snap_rebuild(){
 	ChangeDirectory ## Make sure we are in the correct directory
 	if [ "$WHICHSNAP" -eq "1" ];
 	then
-		echo "Newest snap: $BESTSNAP at block: $BESTSNAPBLOCK"
+		date +"%Y-%m-%d %H:%M:%S || Newest snap: $BESTSNAP at block: $BESTSNAPBLOCK"
     		bash lisk.sh rebuild -u $BESTSNAP
 	else
-		echo "Newest snap: $BESTSNAP2 at block: $BESTSNAPBLOCK2"
+		date +"%Y-%m-%d %H:%M:%S || Newest snap: $BESTSNAP2 at block: $BESTSNAPBLOCK2"
     		bash lisk.sh rebuild -u $BESTSNAP2
 	fi
 }
@@ -132,10 +130,12 @@ local_height() {
 	diff=$(( $HEIGHT - $CHECKSRV ))
 	if [ "$diff" -gt "4" ]
 	then
-        	echo "Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
-		ChangeDirectory ## Make sure we are in the correct directory
-		bash lisk.sh reload
-		sleep 60
+		## Thank you doweig for better output formating
+        	##date +"%Y-%m-%d %H:%M:%S || Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+		##ChangeDirectory ## Make sure we are in the correct directory
+		##bash lisk.sh reload  # 0.5.1 often solves short stucks by itself
+		date +"%Y-%m-%d %H:%M:%S || Sleeping for 140 seconds to wait for autocorrect! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+		sleep 140  #normally a short stuck is solved by itself in less then 140 seconds | by corsaro
 		
 		## Make sure local height is not empty, if it is empty try the call until it is not empty
 		CHECKSRV=`curl -s "http://$SRV/api/loader/status/sync"| jq '.height'`
@@ -149,7 +149,8 @@ local_height() {
 		diff=$(( $HEIGHT - $CHECKSRV ))
 		if [ "$diff" -gt "6" ]
 		then
-			echo "Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+			## Thank you doweig for better output formating
+			date +"%Y-%m-%d %H:%M:%S || Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 			find_newest_snap_rebuild
 			sleep 30
 			SyncState
@@ -176,7 +177,7 @@ local_height() {
 			## 	fi
 			## done
 		else
-			if [[ -z "$SECRET" ]];
+			if [[ -n "$SECRET" ]];
 			then
 				curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## Uncomment this line if you want this script to reenable forging when done
 			fi
@@ -189,8 +190,9 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
+		date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
 		bash lisk.sh stop
-		sleep 2 
+		sleep 2
 		bash lisk.sh start
 		sleep 2
 	fi
@@ -198,6 +200,7 @@ while true; do
 	top_height
 	local_height
 
-	echo "Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+	## Thank you doweig for better output formating
+	date +"%Y-%m-%d %H:%M:%S || Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
 	sleep 10
 done
