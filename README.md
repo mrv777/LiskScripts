@@ -3,6 +3,27 @@
 ## Thank you
 Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
 
+## Control Script
+This is the wrapper script for check_height_and_rebuild.sh and check_consensus.sh.  You can run this on all forging servers.  You only need to use this script directly and not check_height_and_rebuild.sh or check_consensus.sh.  Commands are:
+* start             -- starts both scripts
+* start_consensus   -- starts consensus script
+* start_rebuild     -- starts height_rebuild script
+* stop              -- stops both scripts
+* stop_consensus    -- stops consensus script
+* stop_height       -- stops height_rebuild script
+* upgrade           -- upgrades and runs runs both scripts
+
+#### How to run:
+
+1. `sudo apt-get install jq`
+2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/control_mrvscripts.sh`
+3. `bash control_mrvscripts.sh start`
+
+To check the logs and what the script is going:
+
+* `tail -f heightRebuild.log`
+* `tail -f consensus.log`
+
 ## My consensus check script
 
 ### check_consensus.sh
@@ -16,7 +37,7 @@ If you enter `"Inadequate" >> ~/lisk-main/log/lisk.log` on the server, it should
 #### How to run:
 
 1. `sudo apt-get install jq`
-2. `wget https://lisktools.io/backups/init_height_and_rebuild.sh`
+2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/masterinit_height_and_rebuild.sh`
 3. `bash init_height_and_rebuild.sh start`
 
 To check the logs and what the script is going:
