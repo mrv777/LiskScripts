@@ -78,9 +78,13 @@ upgrade_consensus() {
 
 usage() {
   echo "Usage: $0 <start|stop|upgrade>"
-  echo "start         -- starts both script"
-  echo "stop          -- stops both script"
-  echo "upgrade       -- upgrades and runs both scripts"
+  echo "start					-- starts both scripts"
+  echo "start_consensus         -- starts consensus script"
+  echo "start_rebuild         	-- starts height_rebuild script"
+  echo "stop          			-- stops both scripts"
+  echo "stop_consensus          -- stops consensus script"
+  echo "stop_height          	-- stops height_rebuild script"
+  echo "upgrade       			-- upgrades and runs both scripts"
 }
 
 case $1 in 
@@ -90,9 +94,23 @@ case $1 in
 	check_consensus_running
 	start_consensus
 ;;
+"start_consensus" )
+	check_consensus_running
+	start_consensus
+;;
+"start_rebuild" )
+	check_height_running
+	start_height
+;;
 "stop" ) 
 	check_height_running
 	check_consensus_running
+;;
+"stop_consensus" ) 
+	check_consensus_running
+;;
+"stop_height" ) 
+	check_height_running
 ;;
 "upgrade" ) 
 	check_height_running
