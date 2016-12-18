@@ -48,7 +48,6 @@ start_consensus() {
 	fi
 	if [[ ! -e "$CONSENSUS_SH_FILE" ]] ; then
 		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
-		vi check_consensus.sh
 	fi
 	
 	echo "Starting consensus Script"
