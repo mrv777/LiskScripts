@@ -1,4 +1,4 @@
-## Version 0.9.1
+## Version 0.9.2
 #!/bin/bash
 
 ##  Read config file
@@ -30,6 +30,29 @@ green=`tput setaf 2`
 cyan=`tput setaf 6`
 resetColor=`tput sgr0`
 
+# Set Lisk directory
+function ChangeDirectory(){
+	cd ~
+	cd ~/lisk-main  ## Set to your lisk directory if different
+}
+
+#---------------------------------------------------------------------------
+# Looping while node is syncing blockchain 
+# from Nerigal
+function SyncState()
+{
+	result='true'
+	while [[ -z $result || $result != 'false' ]]
+	do
+		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
+		result=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync" | jq '.syncing')
+		sleep 2
+	done
+	
+	date +"%Y-%m-%d %H:%M:%S || Looks like blockchain is finished syncing."
+}
+#---------------------------------------------------------------------------
+
 
 while true;
 do
@@ -41,6 +64,21 @@ do
 		SERVERLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
 		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
 		CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
+		
+		## If consensus is less than 51 and we are forging soon, try a reload to get new peers
+		## from Nerigal
+		if ["$CONSENSUSLOCAL" -lt "51"];
+		then
+			delegates=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
+			echo "${red}Low consensus.  Looking for delegate forging soon matching $pbk${resetColor}"
+			if [[ " ${delegates[@]} " =~ " ${pbk}" ]]; then
+				echo "${red}You are forging soon, but your consensus is too low!${resetColor}"
+				ChangeDirectory
+				bash lisk.sh reload
+				sleep 20
+				SyncState
+			fi
+		fi
 		
 		## Check log for Inadequate consensus
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
