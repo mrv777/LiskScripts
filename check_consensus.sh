@@ -1,8 +1,15 @@
 ## Version 0.9.2
 #!/bin/bash
 
+## Check for config file
+CONFIG_FILE="mrv_config.json"
+if [[ ! -e "$CONFIG_FILE" ]] ; then
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
+	nano mrv_config.json
+fi
+
 ##  Read config file
-CONFIGFILE=$(cat mrv_config.json)
+CONFIGFILE=$(cat "$CONFIG_FILE")
 SECRET=$( echo "$CONFIGFILE" | jq -r '.secret')
 SRV1=$( echo "$CONFIGFILE" | jq -r '.srv1')
 PRT=$( echo "$CONFIGFILE" | jq -r '.port')
@@ -66,8 +73,9 @@ do
 		CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
 		
 		## If consensus is less than 51 and we are forging soon, try a reload to get new peers
+		## Management script should switch forging server during reload
 		## from Nerigal
-		if ["$CONSENSUSLOCAL" -lt "51"];
+		if [ "$CONSENSUSLOCAL" -lt "51" ];
 		then
 			delegates=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
 			echo "${red}Low consensus.  Looking for delegate forging soon matching $pbk${resetColor}"
