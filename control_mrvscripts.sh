@@ -78,15 +78,33 @@ upgrade_consensus() {
 	nohup bash $CONSENSUS_SH_FILE -S $SRV  > $CONSENSUS_SH_FILE 2>&1&
 }
 
+status() {
+	# Check if it is running
+	if pgrep -fl $CONSENSUS_SH_FILE > /dev/null
+	then
+		echo "Consensus is running"
+	else
+		echo "Consensus is not currently running"
+	fi
+	
+	if pgrep -fl $SH_FILE > /dev/null
+	then
+		echo "heightRebuild is running"
+	else
+		echo "heightRebuild is not currently running"
+	fi
+}
+
 usage() {
   echo "Usage: $0 <start|stop|upgrade>"
-  echo "start					-- starts both scripts"
+  echo "start			-- starts both scripts"
   echo "start_consensus         -- starts consensus script"
   echo "start_rebuild         	-- starts height_rebuild script"
-  echo "stop          			-- stops both scripts"
+  echo "stop          		-- stops both scripts"
   echo "stop_consensus          -- stops consensus script"
   echo "stop_height          	-- stops height_rebuild script"
-  echo "upgrade       			-- upgrades and runs both scripts"
+  echo "status          	-- check if scripts are running"
+  echo "upgrade       		-- upgrades and runs both scripts"
 }
 
 case $1 in 
@@ -113,6 +131,9 @@ case $1 in
 ;;
 "stop_height" ) 
 	check_height_running
+;;
+"status" ) 
+	status
 ;;
 "upgrade" ) 
 	check_height_running
