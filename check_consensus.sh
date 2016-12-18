@@ -34,6 +34,7 @@ TXTDELAY=0
 # Set colors
 red=`tput setaf 1`
 green=`tput setaf 2`
+yellow=`tput setaf 3`
 cyan=`tput setaf 6`
 resetColor=`tput sgr0`
 
@@ -78,9 +79,9 @@ do
 		if [ "$CONSENSUSLOCAL" -lt "51" ];
 		then
 			delegates=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
-			echo "${red}Low consensus.  Looking for delegate forging soon matching $pbk${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}Low consensus.  Looking for delegate forging soon matching $pbk${resetColor}"
 			if [[ " ${delegates[@]} " =~ " ${pbk}" ]]; then
-				echo "${red}You are forging soon, but your consensus is too low!${resetColor}"
+				date +"%Y-%m-%d %H:%M:%S || ${red}You are forging soon, but your consensus is too low.  We will try a reload.${resetColor}"
 				ChangeDirectory
 				bash lisk.sh reload
 				sleep 20
