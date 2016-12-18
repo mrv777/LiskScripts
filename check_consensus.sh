@@ -1,17 +1,35 @@
-## Version 0.9.0
+## Version 0.9.1
 #!/bin/bash
-SECRET="\"YOUR PASSPHRASE\""
-SRV1="localhost"
-PRT=":8000" 			# 7000 on testnet, 8000 on mainnet
-PRTS=":2443"			# https port used to send secret
-pbk="YOUR PUBLIC KEY"
-SERVERS=(			# Array of servers to check in order
-	  xxx.xxx.xxx.xxx
-	  xxx.xxx.xxx.xxx
-	  ...
-	)
 
+##  Read config file
+CONFIGFILE=$(cat mrv_config.json)
+SECRET=$( echo "$CONFIGFILE" | jq -r '.secret')
+SRV1=$( echo "$CONFIGFILE" | jq -r '.srv1')
+PRT=$( echo "$CONFIGFILE" | jq -r '.port')
+pbk=$( echo "$CONFIGFILE" | jq -r '.pbk')
+SERVERS=()
+### Get servers array
+size=$( echo "$CONFIGFILE" | jq '.servers | length') 
+i=0
+
+while [ $i -le $size ]    
+do
+	SERVERS[$i]=$(echo "$CONFIGFILE" | jq -r --argjson i $i '.servers[$i]')
+    i=`expr $i + 1`
+done
+###
+#########################
+
+#Set text delay at 0
 TXTDELAY=0
+
+# Set colors
+red=`tput setaf 1`
+green=`tput setaf 2`
+cyan=`tput setaf 6`
+resetColor=`tput sgr0`
+
+
 while true;
 do
 	## Get forging status of server
@@ -27,7 +45,7 @@ do
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
 		if [[ -n "$LASTLINE" ]]
 		then
-			date +"%Y-%m-%d %H:%M:%S || WARNING: $LASTLINE"
+			date +"%Y-%m-%d %H:%M:%S || ${red}WARNING: $LASTLINE${resetColor}"
 		
 			for SERVER in ${SERVERS[@]}
 			do
@@ -49,7 +67,7 @@ do
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 					echo
-					date +"%Y-%m-%d %H:%M:%S || Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge"
+					date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge${resetColor}"
 					break
 				fi
 			done
@@ -57,7 +75,7 @@ do
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
 		then
-			date +"%Y-%m-%d %H:%M:%S || Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL"
+			date +"%Y-%m-%d %H:%M:%S || ${green}Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL${resetColor}"
 			TXTDELAY=0
 		fi
 			sleep 1
