@@ -6,6 +6,7 @@ CONFIGFILE=$(cat mrv_config.json)
 SECRET=$( echo "$CONFIGFILE" | jq -r '.secret')
 SRV1=$( echo "$CONFIGFILE" | jq -r '.srv1')
 PRT=$( echo "$CONFIGFILE" | jq -r '.port')
+PRTS=$( echo "$CONFIGFILE" | jq -r '.https_port')
 pbk=$( echo "$CONFIGFILE" | jq -r '.pbk')
 SERVERS=()
 ### Get servers array
