@@ -1,5 +1,5 @@
 ## check_height_and_rebuild.sh
-## Version 0.9.0
+## Version 0.9.2
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## 
 ## Current snapshot sources and creation times
@@ -17,7 +17,7 @@ then
   exit 1
 fi
 
-##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to reenable forging when done
+##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to re-enable forging when done.  Should only do this if you only have one node and no other scripts running
 SRV=127.0.0.1:8000
 
 ## Make sure we are in the correct directory (corsaro suggestion)
