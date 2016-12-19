@@ -137,10 +137,14 @@ do
 				## if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "$CONSENSUSLOCAL" ]; ## Removed for now as I believe consensus read from API isn't updated every second to be fully accurate
 				if [ "$diff" -lt "3" ]; 
 				then
-					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable
-					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-					echo
-					date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge${resetColor}"
+					DISABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
+					if [ "$DISABLEFORGE" -eq "true" ];
+					then
+						curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
+						date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge${resetColor}"
+					else
+						date +"%Y-%m-%d %H:%M:%S || ${red}Failed to disable forging on $SRV1${resetColor}"
+					fi
 					break
 				fi
 			done
