@@ -37,6 +37,16 @@ function SyncState()
 		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
 		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
 		sleep 2
+		## Check that lisk is running still and didn't crash when trying to resync
+		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+		if [[ -z "$STATUS" ]];
+		then
+			date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
+			bash lisk.sh stop
+			sleep 2
+			bash lisk.sh start
+			sleep 2
+		fi
 	done
 	
 	date +"%Y-%m-%d %H:%M:%S || Looks like rebuilding finished."
@@ -184,7 +194,7 @@ local_height() {
 		fi
 	fi
 }
-cd ~/lisk-main/  ## Set to your lisk directory if different
+ChangeDirectory  ## Enter lisk directory
 while true; do
 	## Check that lisk is running first!!
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
