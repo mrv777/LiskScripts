@@ -10,21 +10,21 @@
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
-# gregorst
-if [[ "$EUID" -eq 0 ]];
-then
-  echo "Error: Do not run this as root. Exiting."
-  exit 1
-fi
-
 ##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to re-enable forging when done.  Should only do this if you only have one node and no other scripts running
 SRV=127.0.0.1:8000
 
 ## Make sure we are in the correct directory (corsaro suggestion)
 function ChangeDirectory(){
 	cd ~
-	cd ~/lisk-main  ## Set to your lisk directory if different
+	cd ~/lisk-main  ## IMPORTANT: Set to your lisk directory if different
 }
+
+# gregorst
+if [[ "$EUID" -eq 0 ]];
+then
+  echo "Error: Do not run this as root. Exiting."
+  exit 1
+fi
 
 #---------------------------------------------------------------------------
 # Looping while node is building blockchain 
