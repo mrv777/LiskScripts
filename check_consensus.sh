@@ -79,7 +79,7 @@ do
 		if [ "$CONSENSUSLOCAL" -lt "51" ];
 		then
 			delegates=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
-			date +"%Y-%m-%d %H:%M:%S || ${yellow}Low consensus.  Looking for delegate forging soon matching $pbk${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}Low consensus of $CONSENSUSLOCAL.  Looking for delegate forging soon matching $pbk${resetColor}"
 			if [[ $delegates == *"$pbk"* ]];
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${red}You are forging soon, but your consensus is too low. Looking to switch server before reload.${resetColor}"
