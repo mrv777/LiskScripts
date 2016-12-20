@@ -49,7 +49,7 @@ function SyncState()
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			sleep 30 ## Wait 30 seconds to make sure Lisk isn't just down for a rebuild
+			sleep 45 ## Wait 45 seconds to make sure Lisk isn't just down for a rebuild
 			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 			if [[ -z "$STATUS" ]];
 			then
@@ -226,7 +226,7 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
-		sleep 30 ## Wait 30 seconds to make sure Lisk isn't just down for a rebuild
+		sleep 45 ## Wait 45 seconds to make sure Lisk isn't just down for a rebuild
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
