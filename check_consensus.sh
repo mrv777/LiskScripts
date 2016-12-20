@@ -117,10 +117,49 @@ do
 				done
 			fi
 		fi
+		## Check log if node is recovering close to forging time
+		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'starting recovery')
+		if [[ -n "$LASTLINE" ]];
+		then
+			delegates=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}Node is recovering.  Looking for delegate forging soon matching $pbk${resetColor}"
+			if [[ $delegates == *"$pbk"* ]];
+			then
+			date +"%Y-%m-%d %H:%M:%S || ${red}You are forging soon, but your node is recovering. Looking to switch server while recovering.${resetColor}"
+				for SERVER in ${SERVERS[@]}
+				do
+					## Get next server's height and consensus
+					SERVERINFO=$(curl --connect-timeout 3 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
+					HEIGHT=$( echo "$SERVERINFO" | jq '.height')
+					CONSENSUS=$( echo "$SERVERINFO" | jq '.consensus')
+				
+					## Make sure next server is not more than 3 blocks behind this server and consensus is better, then switch
+					if [[  -n "$HEIGHT" ]];
+					then
+						diff=$(( $HEIGHTLOCAL - $HEIGHT ))
+					else
+						diff="999"
+					fi
+					## if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "$CONSENSUSLOCAL" ]; ## Removed for now as I believe consensus read from API isn't updated every second to be fully accurate
+					if [ "$diff" -lt "3" ]; 
+					then
+						DISABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
+						if [ "$DISABLEFORGE" = "true" ];
+						then
+							curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
+							date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to Server $SERVER with a consensus of $CONSENSUS as your node is recovering.${resetColor}"
+							break
+						else
+							date +"%Y-%m-%d %H:%M:%S || ${red}Failed to disable forging on $SRV1 that is recovering before forging${resetColor}"
+						fi
+					fi
+				done
+			fi
+		fi
 		
 		## Check log for Inadequate consensus
 		LASTLINE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
-		if [[ -n "$LASTLINE" ]]
+		if [[ -n "$LASTLINE" ]];
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${red}WARNING: $LASTLINE${resetColor}"
 		
