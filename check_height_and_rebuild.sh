@@ -61,10 +61,10 @@ function SyncState()
 		(( ++TIMER ))
 		if [ "$TIMER" -gt "150" ]; 
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 5 minutes.  We will try a reload again.${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 5 minutes.  We will try a rebuild.${resetColor}"
 			ChangeDirectory
-			bash lisk.sh reload
-			sleep 20
+			find_newest_snap_rebuild
+			sleep 30
 			TIMER=0  ##Reset Timer
 		fi
 	done
