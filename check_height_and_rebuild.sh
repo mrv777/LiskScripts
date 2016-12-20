@@ -49,19 +49,23 @@ function SyncState()
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Lisk does not seem to be running.  Trying a stop and start.${resetColor}"
-			ChangeDirectory
-			bash lisk.sh stop
-			sleep 5
-			bash lisk.sh start
-			sleep 2
+			sleep 30 ## Wait 30 seconds to make sure Lisk isn't just down for a rebuild
+			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+			if [[ -z "$STATUS" ]];
+			then
+				date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
+				bash lisk.sh stop
+				sleep 5
+				bash lisk.sh start
+				sleep 2
+			fi
 		fi
 		
 		## Check if loop has been running for too long
 		(( ++TIMER ))
-		if [ "$TIMER" -gt "150" ]; 
+		if [ "$TIMER" -gt "300" ]; 
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 5 minutes.  We will try a rebuild.${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 10 minutes.  We will try a rebuild.${resetColor}"
 			ChangeDirectory
 			find_newest_snap_rebuild
 			sleep 30
@@ -222,11 +226,16 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
-		date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
-		bash lisk.sh stop
-		sleep 5
-		bash lisk.sh start
-		sleep 2
+		sleep 30 ## Wait 30 seconds to make sure Lisk isn't just down for a rebuild
+		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+		if [[ -z "$STATUS" ]];
+		then
+			date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
+			bash lisk.sh stop
+			sleep 5
+			bash lisk.sh start
+			sleep 2
+		fi
 	fi
 	
 	top_height
