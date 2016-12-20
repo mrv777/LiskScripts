@@ -146,10 +146,10 @@ while true; do
     if [[ "$FORGE1" == "true" ]];
     then
     	diff=$(( $HEIGHT - $HEIGHT1 ))
-    	if [ "$diff" -gt "2" ]
+    	if [ "$diff" -gt "3" ]
 		then
 			diff=$(( $HEIGHT - $HEIGHT2 ))
-			if [ "$diff" -gt "2" ]
+			if [ "$diff" -gt "3" ]
 			then
 				echo
 				echo "$SRV1 height too low. Switching to $SRV3"
@@ -168,10 +168,10 @@ while true; do
     if [[ "$FORGE2" == "true" ]];
     then
     	diff=$(( $HEIGHT - $HEIGHT2 ))
-    	if [ "$diff" -gt "2" ]
+    	if [ "$diff" -gt "3" ]
 		then
 			diff=$(( $HEIGHT - $HEIGHT3 ))
-			if [ "$diff" -gt "2" ]
+			if [ "$diff" -gt "3" ]
 			then
 				echo
 				echo "$SRV2 height too low. Switching to $SRV1"
@@ -190,10 +190,10 @@ while true; do
     if [[ "$FORGE3" == "true" ]];
     then
     	diff=$(( $HEIGHT - $HEIGHT3 ))
-    	if [ "$diff" -gt "2" ]
+    	if [ "$diff" -gt "3" ]
 		then
 			diff=$(( $HEIGHT - $HEIGHT1 ))
-			if [ "$diff" -gt "2" ]
+			if [ "$diff" -gt "3" ]
 			then
 				echo
 				echo "$SRV3 height too low. Switching to $SRV2"
