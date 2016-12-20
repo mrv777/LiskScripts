@@ -101,18 +101,18 @@ do
 					if [ "$diff" -lt "3" ]; 
 					then
 						DISABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
-						if [ "$DISABLEFORGE" -eq "true" ];
+						if [ "$DISABLEFORGE" = "true" ];
 						then
 							curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 							date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${resetColor}"
+							ChangeDirectory
+							bash lisk.sh reload
+							sleep 20
+							SyncState
+							break
 						else
 							date +"%Y-%m-%d %H:%M:%S || ${red}Failed to disable forging on $SRV1 with low consensus before forging${resetColor}"
 						fi
-						ChangeDirectory
-						bash lisk.sh reload
-						sleep 20
-						SyncState
-						break
 					fi
 				done
 			fi
@@ -142,7 +142,7 @@ do
 				if [ "$diff" -lt "3" ]; 
 				then
 					DISABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
-					if [ "$DISABLEFORGE" -eq "true" ];
+					if [ "$DISABLEFORGE" = "true" ];
 					then
 						curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
 						date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to Server $SERVER with a consensus of $CONSENSUS to try and forge${resetColor}"
