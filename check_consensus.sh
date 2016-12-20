@@ -154,7 +154,7 @@ do
 			done
 		fi
 		(( ++TXTDELAY ))
-		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
+		if [[ "$TXTDELAY" -eq "30" ]];  ## Wait 30 seconds to update running status to not overcrowd log
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${green}Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL${resetColor}"
 			TXTDELAY=0
@@ -162,7 +162,7 @@ do
 			sleep 1
 	else
 		(( ++TXTDELAY ))
-		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 60 seconds to update running status to not overcrowd log
+		if [[ "$TXTDELAY" -eq "30" ]];  ## Wait 30 seconds to update running status to not overcrowd log
 		then
 			date +"%Y-%m-%d %H:%M:%S || This server is not forging"
 			TXTDELAY=0
