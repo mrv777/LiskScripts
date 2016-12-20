@@ -53,7 +53,7 @@ function SyncState()
 			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 			if [[ -z "$STATUS" ]];
 			then
-				date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
+				date +"%Y-%m-%d %H:%M:%S || ${red}WARNING: Lisk does not seem to be running.  Trying a stop and start.${resetColor}"
 				bash lisk.sh stop
 				sleep 5
 				bash lisk.sh start
@@ -230,7 +230,7 @@ while true; do
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
+			date +"%Y-%m-%d %H:%M:%S || ${red}WARNING: Lisk does not seem to be running.  Trying a stop and start.${resetColor}"
 			bash lisk.sh stop
 			sleep 5
 			bash lisk.sh start
