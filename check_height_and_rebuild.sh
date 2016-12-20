@@ -19,6 +19,13 @@ function ChangeDirectory(){
 	cd ~/lisk-main  ## IMPORTANT: Set to your lisk directory if different
 }
 
+# Set colors
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+cyan=`tput setaf 6`
+resetColor=`tput sgr0`
+
 # gregorst
 if [[ "$EUID" -eq 0 ]];
 then
@@ -31,6 +38,7 @@ fi
 # from Nerigal
 function SyncState()
 {
+	TIMER=0 ##Timer to make sure this loop hasn't been running for too long
 	result='true'
 	while [[ -z $result || $result != 'false' ]]
 	do
@@ -41,15 +49,27 @@ function SyncState()
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Lisk does not seem to be running.  Trying a stop and start.${resetColor}"
+			ChangeDirectory
 			bash lisk.sh stop
-			sleep 2
+			sleep 5
 			bash lisk.sh start
 			sleep 2
 		fi
+		
+		## Check if loop has been running for too long
+		(( ++TIMER ))
+		if [ "$TIMER" -gt "150" ]; 
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 5 minutes.  We will try a reload again.${resetColor}"
+			ChangeDirectory
+			bash lisk.sh reload
+			sleep 20
+			TIMER=0  ##Reset Timer
+		fi
 	done
 	
-	date +"%Y-%m-%d %H:%M:%S || Looks like rebuilding finished."
+	date +"%Y-%m-%d %H:%M:%S || ${green}Looks like rebuilding finished.${resetColor}"
 	if [[ -n "$SECRET" ]];
 	then
 		curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
@@ -85,7 +105,7 @@ find_newest_snap_rebuild(){
 	  date +"%Y-%m-%d %H:%M:%S || $SNAPSHOT | Block height: $BLOCK"
 	  if [ -z "$BLOCK" ];
 	  then
-	  	date +"%Y-%m-%d %H:%M:%S || Couldn't locate block number"
+	  	date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Couldn't locate block number${resetColor}"
 	  else
 		  if [ "$BLOCK" -gt "$BESTSNAPBLOCK" ];
 		  then
@@ -160,7 +180,7 @@ local_height() {
 		if [ "$diff" -gt "6" ]
 		then
 			## Thank you doweig for better output formating
-			date +"%Y-%m-%d %H:%M:%S || Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+			date +"%Y-%m-%d %H:%M:%S || ${red}Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 			find_newest_snap_rebuild
 			sleep 30
 			SyncState
@@ -202,7 +222,7 @@ while true; do
 	then
 		date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
 		bash lisk.sh stop
-		sleep 2
+		sleep 5
 		bash lisk.sh start
 		sleep 2
 	fi
@@ -211,6 +231,6 @@ while true; do
 	local_height
 
 	## Thank you doweig for better output formating
-	date +"%Y-%m-%d %H:%M:%S || Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+	date +"%Y-%m-%d %H:%M:%S || ${green}Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 	sleep 10
 done
