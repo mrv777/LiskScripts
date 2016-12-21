@@ -12,10 +12,6 @@
 
 ## Check for config file
 CONFIG_FILE="mrv_config.json"
-if [[ ! -e "$CONFIG_FILE" ]] ; then
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
-	nano mrv_config.json
-fi
 
 ##  Read config file
 CONFIGFILE=$(cat "$CONFIG_FILE")
