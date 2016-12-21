@@ -1,5 +1,5 @@
 ## control_mrvscripts.sh
-## Version 0.9.0
+## Version 0.9.2
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 #!/bin/bash
 
@@ -15,7 +15,7 @@ start_height() {
 		touch "$LOG_FILE"
 	fi
 	if [[ ! -e "$SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_height_and_rebuild.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
 	fi
 	
 	echo "Starting heightRebuild Script"
@@ -39,7 +39,7 @@ upgrade_height() {
 		rm "$SH_FILE"
 	fi
 	
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_height_and_rebuild.sh"
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
 	echo "Starting heightRebuild Script"
 	nohup bash $SH_FILE -S $SRV  > $LOG_FILE 2>&1&
 }
@@ -49,7 +49,7 @@ start_consensus() {
 		touch "$CONSENSUS_LOG_FILE"
 	fi
 	if [[ ! -e "$CONSENSUS_SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_consensus.sh"
 	fi
 	
 	echo "Starting consensus Script"
@@ -73,7 +73,7 @@ upgrade_consensus() {
 		rm "$CONSENSUS_SH_FILE"
 	fi
 	
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_consensus.sh"
 	vi check_consensus.sh
 	echo "Starting consensus Script"
 	nohup bash $CONSENSUS_SH_FILE -S $SRV  > $CONSENSUS_SH_FILE 2>&1&
@@ -84,7 +84,7 @@ start_manage3() {
 		touch "$MANAGE_LOG_FILE"
 	fi
 	if [[ ! -e "$MANAGE_SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/manage3.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/manage3.sh"
 	fi
 	
 	echo "Starting manage3 Script"
