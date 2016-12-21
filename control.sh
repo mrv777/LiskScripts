@@ -14,7 +14,7 @@ start_height() {
 	## Check for config file
 	CONFIG_FILE="mrv_config.json"
 	if [[ ! -e "$CONFIG_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/mrv_config.json"
 		PS3='Please select an editor to input config details: '
 		options=("nano" "vi")
 		select opt in "${options[@]}"
