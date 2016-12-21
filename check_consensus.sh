@@ -11,6 +11,7 @@ fi
 ##  Read config file
 CONFIGFILE=$(cat "$CONFIG_FILE")
 SECRET=$( echo "$CONFIGFILE" | jq -r '.secret')
+LDIRECTORY=$( echo "$CONFIGFILE" | jq -r '.lisk_directory')
 SRV1=$( echo "$CONFIGFILE" | jq -r '.srv1')
 PRT=$( echo "$CONFIGFILE" | jq -r '.port')
 PRTS=$( echo "$CONFIGFILE" | jq -r '.https_port')
@@ -41,7 +42,7 @@ resetColor=`tput sgr0`
 # Set Lisk directory
 function ChangeDirectory(){
 	cd ~
-	cd ~/lisk-main  ## Set to your lisk directory if different
+	cd $LDIRECTORY  ## Set to your lisk directory if different
 }
 
 #---------------------------------------------------------------------------
