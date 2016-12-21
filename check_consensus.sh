@@ -69,6 +69,11 @@ do
 	FORGE=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		FORGEDBLOCKLOG=$(tail ~/lisk-main/logs/lisk.log -n 20| grep 'Forged new block')
+		if [[ -n "$FORGEDBLOCKLOG" ]];
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${green}$FORGEDBLOCKLOG{resetColor}"
+		fi
 		## Get current server's height and consensus
 		SERVERLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
 		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
