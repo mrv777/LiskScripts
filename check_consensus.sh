@@ -39,6 +39,10 @@ yellow=`tput setaf 3`
 cyan=`tput setaf 6`
 resetColor=`tput sgr0`
 
+## Log start of script
+date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's consensus script{resetColor}"
+
+
 # Set Lisk directory
 function ChangeDirectory(){
 	cd ~
@@ -69,6 +73,7 @@ do
 	FORGE=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		## Log when a block is forged
 		FORGEDBLOCKLOG=$(tail ~/lisk-main/logs/lisk.log -n 20| grep 'Forged new block')
 		if [[ -n "$FORGEDBLOCKLOG" ]];
 		then
