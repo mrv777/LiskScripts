@@ -10,13 +10,23 @@
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
-##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to re-enable forging when done.  Should only do this if you only have one node and no other scripts running
+## Check for config file
+CONFIG_FILE="mrv_config.json"
+if [[ ! -e "$CONFIG_FILE" ]] ; then
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
+	nano mrv_config.json
+fi
+
+##  Read config file
+CONFIGFILE=$(cat "$CONFIG_FILE")
+##SECRET=$( echo "$CONFIGFILE" | jq -r '.secret') ## Uncomment this line if you want this script to re-enable forging when done.  Should only do this if you only have one node and no other scripts running
+LDIRECTORY=$( echo "$CONFIGFILE" | jq -r '.lisk_directory')
 SRV=127.0.0.1:8000
 
 ## Make sure we are in the correct directory (corsaro suggestion)
 function ChangeDirectory(){
 	cd ~
-	cd ~/lisk-main  ## IMPORTANT: Set to your lisk directory if different
+	cd $LDIRECTORY
 }
 
 # Set colors
