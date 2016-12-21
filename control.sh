@@ -7,6 +7,8 @@ SH_FILE="check_height_and_rebuild.sh"
 LOG_FILE="heightRebuild.log"
 CONSENSUS_SH_FILE="check_consensus.sh"
 CONSENSUS_LOG_FILE="consensus.log"
+MANAGE_SH_FILE="manage3.sh"
+MANAGE_LOG_FILE="manage.log"
 
 start_height() {
 	if [[ ! -e "$LOG_FILE" ]] ; then
@@ -77,8 +79,31 @@ upgrade_consensus() {
 	nohup bash $CONSENSUS_SH_FILE -S $SRV  > $CONSENSUS_SH_FILE 2>&1&
 }
 
-status() {
+start_manage3() {
+	if [[ ! -e "$MANAGE_LOG_FILE" ]] ; then
+		touch "$MANAGE_LOG_FILE"
+	fi
+	if [[ ! -e "$MANAGE_SH_FILE" ]] ; then
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/manage3.sh"
+	fi
+	
+	echo "Starting manage3 Script"
+	nohup bash $MANAGE_SH_FILE -S $SRV  > $MANAGE_LOG_FILE 2>&1&
+}
+
+check_manage3_running() {
 	# Check if it is running
+	if pgrep -fl $MANAGE_SH_FILE > /dev/null
+	then
+		echo "Killing manage3 process"
+		pkill -f $MANAGE_SH_FILE -9
+	else
+		echo "Manage3 is not currently running"
+	fi
+}
+
+status() {
+	# Check if consensus is running
 	if pgrep -fl $CONSENSUS_SH_FILE > /dev/null
 	then
 		echo "Consensus is running"
@@ -86,22 +111,33 @@ status() {
 		echo "Consensus is not currently running"
 	fi
 	
+	# Check if heightRebuild is running
 	if pgrep -fl $SH_FILE > /dev/null
 	then
-		echo "heightRebuild is running"
+		echo "HeightRebuild is running"
 	else
-		echo "heightRebuild is not currently running"
+		echo "HeightRebuild is not currently running"
+	fi
+	
+	# Check if manage3 is running
+	if pgrep -fl $MANAGE_SH_FILE > /dev/null
+	then
+		echo "Manage3 is running"
+	else
+		echo "Manage3 is not currently running"
 	fi
 }
 
 usage() {
   echo "Usage: $0 <start|stop|upgrade>"
-  echo "start			-- starts both scripts"
-  echo "start_consensus         -- starts consensus script"
-  echo "start_rebuild         	-- starts height_rebuild script"
-  echo "stop          		-- stops both scripts"
-  echo "stop_consensus          -- stops consensus script"
-  echo "stop_height          	-- stops height_rebuild script"
+  echo "start			-- starts consensus & height_rebuild scripts"
+  echo "startc			-- starts consensus script"
+  echo "starth         		-- starts height_rebuild script"
+  echo "startm         		-- starts manage3 script"
+  echo "stop          		-- stops all scripts"
+  echo "stopc          		-- stops consensus script"
+  echo "stoph			-- stops height_rebuild script"
+  echo "stopm         		-- stops manage3 script"
   echo "status          	-- check if scripts are running"
   echo "upgrade       		-- upgrades and runs both scripts"
 }
@@ -113,23 +149,31 @@ case $1 in
 	check_consensus_running
 	start_consensus
 ;;
-"start_consensus" )
+"startc" )
 	check_consensus_running
 	start_consensus
 ;;
-"start_rebuild" )
+"starth" )
 	check_height_running
 	start_height
+;;
+"startm" )
+	check_manage3_running
+	start_manage3
 ;;
 "stop" ) 
 	check_height_running
 	check_consensus_running
+	check_manage3_running
 ;;
-"stop_consensus" ) 
+"stopc" ) 
 	check_consensus_running
 ;;
-"stop_height" ) 
+"stoph" ) 
 	check_height_running
+;;
+"stopm" ) 
+	check_manage3_running
 ;;
 "status" ) 
 	status
