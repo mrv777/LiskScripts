@@ -19,18 +19,21 @@ CONFIGFILE=$(cat "$CONFIG_FILE")
 LDIRECTORY=$( echo "$CONFIGFILE" | jq -r '.lisk_directory')
 SRV=127.0.0.1:8000
 
-## Make sure we are in the correct directory (corsaro suggestion)
-function ChangeDirectory(){
-	cd ~
-	cd $LDIRECTORY
-}
-
 # Set colors
 red=`tput setaf 1`
 green=`tput setaf 2`
 yellow=`tput setaf 3`
 cyan=`tput setaf 6`
 resetColor=`tput sgr0`
+
+## Log start of script
+date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's height checking script${resetColor}"
+
+## Make sure we are in the correct directory (corsaro suggestion)
+function ChangeDirectory(){
+	cd ~
+	eval "cd $LDIRECTORY"
+}
 
 # gregorst
 if [[ "$EUID" -eq 0 ]];
