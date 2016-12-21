@@ -40,7 +40,7 @@ cyan=`tput setaf 6`
 resetColor=`tput sgr0`
 
 ## Log start of script
-date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's consensus script{resetColor}"
+date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's consensus script${resetColor}"
 
 
 # Set Lisk directory
@@ -77,7 +77,7 @@ do
 		FORGEDBLOCKLOG=$(tail ~/lisk-main/logs/lisk.log -n 20| grep 'Forged new block')
 		if [[ -n "$FORGEDBLOCKLOG" ]];
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${green}$FORGEDBLOCKLOG{resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${green}$FORGEDBLOCKLOG${resetColor}"
 		fi
 		## Get current server's height and consensus
 		SERVERLOCAL=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
