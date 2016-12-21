@@ -11,6 +11,27 @@ MANAGE_SH_FILE="manage3.sh"
 MANAGE_LOG_FILE="manage.log"
 
 start_height() {
+	## Check for config file
+	CONFIG_FILE="mrv_config.json"
+	if [[ ! -e "$CONFIG_FILE" ]] ; then
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
+		PS3='Please select an editor to input config details: '
+		options=("nano" "vi")
+		select opt in "${options[@]}"
+		do
+		    case $opt in
+			"nano")
+			    nano mrv_config.json
+			    break
+			    ;;
+			"vi")
+			    vi mrv_config.json
+			    break
+			    ;;
+			*) echo invalid option;;
+		    esac
+		done
+	fi
 	if [[ ! -e "$LOG_FILE" ]] ; then
 		touch "$LOG_FILE"
 	fi
@@ -45,6 +66,27 @@ upgrade_height() {
 }
 
 start_consensus() {
+	## Check for config file
+	CONFIG_FILE="mrv_config.json"
+	if [[ ! -e "$CONFIG_FILE" ]] ; then
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
+		PS3='Please select an editor to input config details: '
+		options=("nano" "vi")
+		select opt in "${options[@]}"
+		do
+		    case $opt in
+			"nano")
+			    nano mrv_config.json
+			    break
+			    ;;
+			"vi")
+			    vi mrv_config.json
+			    break
+			    ;;
+			*) echo invalid option;;
+		    esac
+		done
+	fi
 	if [[ ! -e "$CONSENSUS_LOG_FILE" ]] ; then
 		touch "$CONSENSUS_LOG_FILE"
 	fi
