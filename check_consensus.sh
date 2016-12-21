@@ -3,25 +3,6 @@
 
 ## Check for config file
 CONFIG_FILE="mrv_config.json"
-if [[ ! -e "$CONFIG_FILE" ]] ; then
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
-	PS3='Please select an editor to input config details: '
-	options=("nano" "vi")
-	select opt in "${options[@]}"
-	do
-	    case $opt in
-		"nano")
-		    nano mrv_config.json
-		    break
-		    ;;
-		"vi")
-		    vi mrv_config.json
-		    break
-		    ;;
-		*) echo invalid option;;
-	    esac
-	done
-fi
 
 ##  Read config file
 CONFIGFILE=$(cat "$CONFIG_FILE")
