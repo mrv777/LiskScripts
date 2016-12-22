@@ -1,4 +1,4 @@
-# Lisk Delegate Scripts  (BETA v0.9)
+# Lisk Delegate Scripts  (BETA v0.9.2)
 
 ## Thank you
 Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
@@ -6,21 +6,21 @@ Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, N
 ## Control Script
 This is the wrapper script for check_height_and_rebuild.sh and check_consensus.sh.  You can run this on all forging servers.  You only need to use this script directly and not check_height_and_rebuild.sh or check_consensus.sh.  Commands are:
 * start             -- starts both scripts
-* start_consensus   -- starts consensus script
-* start_rebuild     -- starts height_rebuild script
+* startc            -- starts consensus script
+* starth            -- starts height_rebuild script
 * stop              -- stops both scripts
-* stop_consensus    -- stops consensus script
-* stop_height       -- stops height_rebuild script
+* stopc             -- stops consensus script
+* stoph             -- stops height_rebuild script
 * upgrade           -- upgrades and runs runs both scripts
 
 #### How to run:
 
 1. `sudo apt-get install jq`
-2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/control_mrvscripts.sh`
+2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/control.sh`
 3. Choose which scripts to run
-  1. `bash control_mrvscripts.sh start` - Both
-  2. `bash control_mrvscripts.sh start_consensus` - Consensus script only
-  3. `bash control_mrvscripts.sh start_rebuild` - Rebuild script only
+  1. `bash control.sh start` - Both
+  2. `bash control.sh startc` - Consensus script only
+  3. `bash control.sh starth` - Rebuild script only
 
 To check the logs and what the script is going:
 
@@ -30,7 +30,7 @@ To check the logs and what the script is going:
 ## My consensus check script
 
 ### check_consensus.sh
-**User does not need to directly do anything with this.  control_mrvscripts.sh interfaces with it automatically**
+**User does not need to directly do anything with this.  control.sh interfaces with it automatically**
 
 This script looks at the last two lines of the log: ~/lisk-main/logs/lisk.log for the word 'Inadequate'.  If it sees that word then it tries to switch forging quickly to server 2.  If server two is not at a good height, it tries server 3 if available.  You can run this on all forging servers.
 
@@ -39,14 +39,8 @@ If you enter `"Inadequate" >> ~/lisk-main/log/lisk.log` on the server, it should
 
 ## My Anti-fork script
 
-### init_height_and_rebuild.sh (Depreciated)
-Wrapper script for check_height_and_rebuild.sh.  You can run this on all forging servers.  You only need to use this script directly and not check_height_and_rebuild.sh.  Commands are:
-* start         -- starts script
-* stop          -- stops script
-* upgrade       -- upgrades and runs script
-
 ### check_height_and_rebuild.sh
-**User does not need to directly do anything with this.  control_mrvscripts.sh interfaces with it automatically**
+**User does not need to directly do anything with this.  control.sh interfaces with it automatically**
 
 Compares the height of your 100 connected peers and gets the highest height.  Then checks your node is within 4 blocks of it.  If not, it tries a reload first.  If the reload doesn't get it back within an acceptable range, it tries a rebuild.  The rebuild attempts to get the newest snap available from servers listed. 
 

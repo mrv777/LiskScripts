@@ -1,5 +1,5 @@
 ## check_height_and_rebuild.sh
-## Version 0.9.0
+## Version 0.9.2
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## 
 ## Current snapshot sources and creation times
@@ -10,6 +10,31 @@
 ## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
+## Check for config file
+CONFIG_FILE="mrv_config.json"
+
+##  Read config file
+CONFIGFILE=$(cat "$CONFIG_FILE")
+##SECRET=$( echo "$CONFIGFILE" | jq -r '.secret') ## Uncomment this line if you want this script to re-enable forging when done.  Should only do this if you only have one node and no other scripts running
+LDIRECTORY=$( echo "$CONFIGFILE" | jq -r '.lisk_directory')
+SRV=127.0.0.1:8000
+
+# Set colors
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+cyan=`tput setaf 6`
+resetColor=`tput sgr0`
+
+## Log start of script
+date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's height checking script${resetColor}"
+
+## Make sure we are in the correct directory (corsaro suggestion)
+function ChangeDirectory(){
+	cd ~
+	eval "cd $LDIRECTORY"
+}
+
 # gregorst
 if [[ "$EUID" -eq 0 ]];
 then
@@ -17,29 +42,47 @@ then
   exit 1
 fi
 
-##SECRET="\"YOUR PASSPHRASE\"" ## Uncomment this line if you want this script to reenable forging when done
-SRV=127.0.0.1:8000
-
-## Make sure we are in the correct directory (corsaro suggestion)
-function ChangeDirectory(){
-	cd ~
-	cd ~/lisk-main  ## Set to your lisk directory if different
-}
-
 #---------------------------------------------------------------------------
 # Looping while node is building blockchain 
 # from Nerigal
 function SyncState()
 {
+	TIMER=0 ##Timer to make sure this loop hasn't been running for too long
 	result='true'
 	while [[ -z $result || $result != 'false' ]]
 	do
 		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
 		result=`curl -s "http://$SRV/api/loader/status/sync"| jq '.syncing'`
 		sleep 2
+		## Check that lisk is running still and didn't crash when trying to resync
+		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+		if [[ -z "$STATUS" ]];
+		then
+			sleep 45 ## Wait 45 seconds to make sure Lisk isn't just down for a rebuild
+			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+			if [[ -z "$STATUS" ]];
+			then
+				date +"%Y-%m-%d %H:%M:%S || ${red}WARNING: Lisk does not seem to be running.  Trying a stop and start.${resetColor}"
+				bash lisk.sh stop
+				sleep 5
+				bash lisk.sh start
+				sleep 2
+			fi
+		fi
+		
+		## Check if loop has been running for too long
+		(( ++TIMER ))
+		if [ "$TIMER" -gt "300" ]; 
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 10 minutes.  We will try a rebuild.${resetColor}"
+			ChangeDirectory
+			find_newest_snap_rebuild
+			sleep 30
+			TIMER=0  ##Reset Timer
+		fi
 	done
 	
-	date +"%Y-%m-%d %H:%M:%S || Looks like rebuilding finished."
+	date +"%Y-%m-%d %H:%M:%S || ${green}Looks like rebuilding finished.${resetColor}"
 	if [[ -n "$SECRET" ]];
 	then
 		curl --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":'"$SECRET"'}' http://"$SRV"/api/delegates/forging/enable ## If you want this script to reenable forging when done
@@ -75,7 +118,7 @@ find_newest_snap_rebuild(){
 	  date +"%Y-%m-%d %H:%M:%S || $SNAPSHOT | Block height: $BLOCK"
 	  if [ -z "$BLOCK" ];
 	  then
-	  	date +"%Y-%m-%d %H:%M:%S || Couldn't locate block number"
+	  	date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Couldn't locate block number${resetColor}"
 	  else
 		  if [ "$BLOCK" -gt "$BESTSNAPBLOCK" ];
 		  then
@@ -131,11 +174,13 @@ local_height() {
 	if [ "$diff" -gt "4" ]
 	then
 		## Thank you doweig for better output formating
-        	##date +"%Y-%m-%d %H:%M:%S || Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
-		##ChangeDirectory ## Make sure we are in the correct directory
-		##bash lisk.sh reload  # 0.5.1 often solves short stucks by itself
-		date +"%Y-%m-%d %H:%M:%S || Sleeping for 140 seconds to wait for autocorrect! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
-		sleep 140  #normally a short stuck is solved by itself in less then 140 seconds | by corsaro
+        	date +"%Y-%m-%d %H:%M:%S || ${yellow}Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff{resetColor}"
+		ChangeDirectory ## Make sure we are in the correct directory
+		bash lisk.sh reload  # 0.5.1 often solves short stucks by itself, but reload anyways :)
+		sleep 20
+		SyncState
+		##date +"%Y-%m-%d %H:%M:%S || Sleeping for 140 seconds to wait for autocorrect! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+		##sleep 140  #normally a short stuck is solved by itself in less then 140 seconds | by corsaro || Costs too much time though
 		
 		## Make sure local height is not empty, if it is empty try the call until it is not empty
 		CHECKSRV=`curl -s "http://$SRV/api/loader/status/sync"| jq '.height'`
@@ -150,7 +195,7 @@ local_height() {
 		if [ "$diff" -gt "6" ]
 		then
 			## Thank you doweig for better output formating
-			date +"%Y-%m-%d %H:%M:%S || Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+			date +"%Y-%m-%d %H:%M:%S || ${red}Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 			find_newest_snap_rebuild
 			sleep 30
 			SyncState
@@ -184,23 +229,28 @@ local_height() {
 		fi
 	fi
 }
-cd ~/lisk-main/  ## Set to your lisk directory if different
+ChangeDirectory  ## Enter lisk directory
 while true; do
 	## Check that lisk is running first!!
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
-		date +"%Y-%m-%d %H:%M:%S || WARNING: Lisk does not seem to be running.  Trying a stop and start"
-		bash lisk.sh stop
-		sleep 2
-		bash lisk.sh start
-		sleep 2
+		sleep 45 ## Wait 45 seconds to make sure Lisk isn't just down for a rebuild
+		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
+		if [[ -z "$STATUS" ]];
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${red}WARNING: Lisk does not seem to be running.  Trying a stop and start.${resetColor}"
+			bash lisk.sh stop
+			sleep 5
+			bash lisk.sh start
+			sleep 2
+		fi
 	fi
 	
 	top_height
 	local_height
 
 	## Thank you doweig for better output formating
-	date +"%Y-%m-%d %H:%M:%S || Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff"
+	date +"%Y-%m-%d %H:%M:%S || ${green}Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 	sleep 10
 done

@@ -1,0 +1,12 @@
+{
+	"port":":8000",
+	"https_port":":2443",
+	"lisk_directory":"~/lisk-main",
+	"pbk":"YOUR PUBLIC KEY",
+	"secret":"YOUR SECRET",
+	"srv1":"localhost",
+	"servers": [
+		"xxx.xxx.xxx.xxx",
+		"xxx.xxx.xxx.xxx"
+	  ]
+}
