@@ -42,7 +42,7 @@ date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's consensus script${resetColor}
 # Set Lisk directory
 function ChangeDirectory(){
 	cd ~
-	cd $LDIRECTORY  ## Set to your lisk directory if different
+	eval "cd $LDIRECTORY"
 }
 
 #---------------------------------------------------------------------------
