@@ -16,11 +16,11 @@ This is the wrapper script for check_height_and_rebuild.sh and check_consensus.s
 #### How to run:
 
 1. `sudo apt-get install jq`
-2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/control_mrvscripts.sh`
+2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/control.sh`
 3. Choose which scripts to run
-  1. `bash control_mrvscripts.sh start` - Both
-  2. `bash control_mrvscripts.sh start_consensus` - Consensus script only
-  3. `bash control_mrvscripts.sh start_rebuild` - Rebuild script only
+  1. `bash control.sh start` - Both
+  2. `bash control.sh startc` - Consensus script only
+  3. `bash control.sh starth` - Rebuild script only
 
 To check the logs and what the script is going:
 
