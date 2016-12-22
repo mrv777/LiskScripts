@@ -14,7 +14,7 @@ start_height() {
 	## Check for config file
 	CONFIG_FILE="mrv_config.json"
 	if [[ ! -e "$CONFIG_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/mrv_config.json"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/mrv_config.json"
 		PS3='Please select an editor to input config details: '
 		options=("nano" "vi")
 		select opt in "${options[@]}"
@@ -36,7 +36,7 @@ start_height() {
 		touch "$LOG_FILE"
 	fi
 	if [[ ! -e "$SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_height_and_rebuild.sh"
 	fi
 	
 	echo "Starting heightRebuild Script"
@@ -60,7 +60,7 @@ upgrade_height() {
 		rm "$SH_FILE"
 	fi
 	
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_height_and_rebuild.sh"
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_height_and_rebuild.sh"
 	echo "Starting heightRebuild Script"
 	nohup bash $SH_FILE -S $SRV  > $LOG_FILE 2>&1&
 }
@@ -91,7 +91,7 @@ start_consensus() {
 		touch "$CONSENSUS_LOG_FILE"
 	fi
 	if [[ ! -e "$CONSENSUS_SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_consensus.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
 	fi
 	
 	echo "Starting consensus Script"
@@ -115,7 +115,7 @@ upgrade_consensus() {
 		rm "$CONSENSUS_SH_FILE"
 	fi
 	
-	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/check_consensus.sh"
+	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
 	vi check_consensus.sh
 	echo "Starting consensus Script"
 	nohup bash $CONSENSUS_SH_FILE -S $SRV  > $CONSENSUS_SH_FILE 2>&1&
@@ -126,7 +126,7 @@ start_manage3() {
 		touch "$MANAGE_LOG_FILE"
 	fi
 	if [[ ! -e "$MANAGE_SH_FILE" ]] ; then
-		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/develop/manage3.sh"
+		wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/manage3.sh"
 	fi
 	
 	echo "Starting manage3 Script"
