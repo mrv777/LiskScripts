@@ -102,7 +102,7 @@ while true; do
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${yellow}No node forging.  Starting on $SERVER${resetColor}"
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-				FORGING=$num
+				PREVIOUSFORGING=$num
 				break ## Exit loop once we find the first server at an acceptable height and consensus
 			fi
 			((num++))
@@ -131,7 +131,7 @@ while true; do
 				if [ "$diff" -lt "4" ] && [ "${SERVERSCONSENSUS[$num]}" -gt "50" ]; 
 				then
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
-					FORGING=$index
+					PREVIOUSFORGING=$index
 					date +"%Y-%m-%d %H:%M:%S || ${cyan}Setting forging to ${SERVERS[$index]}${resetColor}"
 					break ## Exit loop once we find the first server at an acceptable height and consensus
 				fi
@@ -144,6 +144,21 @@ while true; do
 		sleep 24
 	else  ## Same server still forging, check that everything still looks good on it
 		date +"%Y-%m-%d %H:%M:%S || Highest Height: $HEIGHT"
+		
+		##Check that it is the main server forging
+		if [ "$FORGING" != "0" ];
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}Main server not forging${resetColor}"
+			diff=$(( $HIGHHEIGHT - ${SERVERSINFO[0]} ))
+			if [ "$diff" -lt "4" ] && [ "${SERVERSCONSENSUS[0]}" -gt "50" ]; 
+			then
+				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$FORGING]}""$PRTS"/api/delegates/forging/disable
+				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[0]}""$PRTS"/api/delegates/forging/enable
+				PREVIOUSFORGING=0
+				date +"%Y-%m-%d %H:%M:%S || ${cyan}Setting forging to back to main server: ${SERVERS[0]}${resetColor}"
+				continue ## Exit loop once if we can set forging back to main server
+			fi
+		fi
 	
 		diff=$(( $HIGHHEIGHT - ${SERVERSINFO[$FORGING]} ))
 		if [ "$diff" -gt "3" ]
