@@ -1,4 +1,4 @@
-## control_mrvscripts.sh
+## control.sh
 ## Version 0.9.3
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 #!/bin/bash
