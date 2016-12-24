@@ -4,6 +4,11 @@
 	"lisk_directory":"~/lisk-main",
 	"pbk":"YOUR PUBLIC KEY",
 	"secret":"YOUR SECRET",
+	"manage_servers": [
+		"xxx.xxx.xxx.xxx",
+		"xxx.xxx.xxx.xxx",
+		"xxx.xxx.xxx.xxx"
+	  ],
 	"srv1":"localhost",
 	"servers": [
 		"xxx.xxx.xxx.xxx",
