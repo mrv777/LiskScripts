@@ -174,7 +174,7 @@ local_height() {
 	if [ "$diff" -gt "4" ]
 	then
 		## Thank you doweig for better output formating
-        	date +"%Y-%m-%d %H:%M:%S || ${yellow}Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff{resetColor}"
+        	date +"%Y-%m-%d %H:%M:%S || ${yellow}Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 		ChangeDirectory ## Make sure we are in the correct directory
 		bash lisk.sh reload  # 0.5.1 often solves short stucks by itself, but reload anyways :)
 		sleep 20
