@@ -18,20 +18,18 @@ i=0
 while [ $i -le $((SIZE-1)) ]    
 do
 	SERVERS[$i]=$(echo "$CONFIGFILE" | jq -r --argjson i $i '.manage_servers[$i]')
-    i=`expr $i + 1`
+    i=$(( i + 1 ))
 done
 ###
 #########################
 
 ## Set colors
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-CYAN=`tput setaf 6`
-RESETCOLOR=`tput sgr0`
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+RESETCOLOR=$(tput sgr0)
 
-## Start counter for server 1 reset at 0
-DELAYCOUNT=0
 FORGING=0
 PREVIOUSFORGING=0
 
@@ -46,7 +44,7 @@ while true; do
 	HIGHHEIGHT=0
 	
 	## Get info on all servers
-	for SERVER in ${SERVERS[@]}
+	for SERVER in "${SERVERS[@]}"
 	do
 		## Get next server's height and consensus
 		SERVERINFO=$(curl --connect-timeout 2 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
@@ -95,9 +93,9 @@ while true; do
 	## Check if any servers are forging
 	if ! [[ ${SERVERSFORGING[*]} =~ "true" ]];
 	then
-		for SERVER in ${SERVERS[@]}
+		for SERVER in "${SERVERS[@]}"
 		do
-			DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$NUM]} ))
+			DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[$NUM]} ))
 			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}No node forging.  Starting on $SERVER${RESETCOLOR}"
@@ -120,14 +118,14 @@ while true; do
 	if [ "$FORGINGCOUNT" -gt "1" ]
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${RED}Multiple servers forging!${RESETCOLOR}"
-			for SERVER in ${SERVERS[@]}
+			for SERVER in "${SERVERS[@]}"
 			do
 				## Disable forging on all servers first
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/disable
 			done
 			for index in "${!SERVERS[@]}"
 			do
-				DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$index]} ))
+				DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[$index]} ))
 				if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 				then
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
@@ -138,7 +136,7 @@ while true; do
 			done
 		fi
 
-	if [[ $PREVIOUSFORGING != $FORGING ]];
+	if [[ $PREVIOUSFORGING != "$FORGING" ]];
 	then
 		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 30 seconds${RESETCOLOR}"
 		sleep 24
@@ -149,7 +147,7 @@ while true; do
 		if [ "$FORGING" != "0" ];
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Main server not forging${RESETCOLOR}"
-			DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[0]} ))
+			DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[0]} ))
 			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[0]}" -gt "50" ]; 
 			then
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$FORGING]}""$PRTS"/api/delegates/forging/disable
@@ -160,18 +158,18 @@ while true; do
 			fi
 		fi
 	
-		DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$FORGING]} ))
+		DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[$FORGING]} ))
 		if [ "$DIFF" -gt "3" ]
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${RED}${SERVERS[$FORGING]} too low of height.${RESETCOLOR}"
-			for SERVER in ${SERVERS[@]}
+			for SERVER in "${SERVERS[@]}"
 			do
 				## Disable forging on all servers first
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/disable
 			done
 			for index in "${!SERVERS[@]}"
 			do
-				DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$index]} ))
+				DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[$index]} ))
 				if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 				then
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
