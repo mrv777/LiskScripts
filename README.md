@@ -1,13 +1,14 @@
-# Lisk Delegate Scripts  (BETA v0.9.2)
+# Lisk Delegate Scripts  (BETA v0.9.3)
 
 ## Thank you
-Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
+Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, stoner19, punkrock, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
 
 ## Control Script
 This is the wrapper script for check_height_and_rebuild.sh and check_consensus.sh.  You can run this on all forging servers.  You only need to use this script directly and not check_height_and_rebuild.sh or check_consensus.sh.  Commands are:
 * start             -- starts both scripts
 * startc            -- starts consensus script
 * starth            -- starts height_rebuild script
+* startm            -- starts management script
 * stop              -- stops both scripts
 * stopc             -- stops consensus script
 * stoph             -- stops height_rebuild script
@@ -46,18 +47,18 @@ Compares the height of your 100 connected peers and gets the highest height.  Th
 
 ## My Management script
 
-### manage3.sh
-This script will check the block heights of 3 servers and make sure the one forging is near the top height of the 3, if not it switches to the next server (1->2,2->3,3->1).  It also makes sure only one server is forging.
-
-Currently designed to run in a screen on it's own monitoring server.
+### manage.sh
+**User does not need to directly do anything with this.  control.sh interfaces with it automatically**
+This script will check the block heights of all listed servers.  It will attempt to have one and only one server forging and prefer to have server 1 do the forging.  If the forging server swtiches by something other then this script, it will pause for 30 seconds and then check the status of the servers after that.
 
 #### How to run:
 
-1. `sudo apt-get install jq screen`
-2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/manage3.sh`
-3. `nano manage3.sh` and edit the top variables
-4. `screen`
-5. `bash manage3.sh`
-6. CTRL+A, D to detach the screen
+1. `sudo apt-get install jq`
+2. `wget https://raw.githubusercontent.com/mrv777/LiskScripts/master/control.sh`
+3. `bash control.sh startm` - Start management script
+
+To check the logs and what the script is going:
+
+* `tail -f manage.log`
 
 *Donation Address: 3532362465127676136L*
