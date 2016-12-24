@@ -9,13 +9,13 @@ CONFIGFILE=$(cat "$CONFIG_FILE")
 SECRET=$( echo "$CONFIGFILE" | jq -r '.secret')
 PRT=$( echo "$CONFIGFILE" | jq -r '.port')
 PRTS=$( echo "$CONFIGFILE" | jq -r '.https_port')
-pbk=$( echo "$CONFIGFILE" | jq -r '.pbk')
+PBK=$( echo "$CONFIGFILE" | jq -r '.pbk')
 SERVERS=()
 ### Get servers array
-size=$( echo "$CONFIGFILE" | jq '.manage_servers | length') 
+SIZE=$( echo "$CONFIGFILE" | jq '.manage_servers | length') 
 i=0
 
-while [ $i -le $((size-1)) ]    
+while [ $i -le $((SIZE-1)) ]    
 do
 	SERVERS[$i]=$(echo "$CONFIGFILE" | jq -r --argjson i $i '.manage_servers[$i]')
     i=`expr $i + 1`
@@ -24,11 +24,11 @@ done
 #########################
 
 ## Set colors
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-cyan=`tput setaf 6`
-resetColor=`tput sgr0`
+RED=`tput setaf 1`
+GREEN=`tput setaf 2`
+YELLOW=`tput setaf 3`
+CYAN=`tput setaf 6`
+RESETCOLOR=`tput sgr0`
 
 ## Start counter for server 1 reset at 0
 DELAYCOUNT=0
@@ -36,13 +36,13 @@ FORGING=0
 PREVIOUSFORGING=0
 
 ## Log start of script
-date +"%Y-%m-%d %H:%M:%S || ${green}Starting MrV's management script${resetColor}"
+date +"%Y-%m-%d %H:%M:%S || ${GREEN}Starting MrV's management script${RESETCOLOR}"
 
 while true; do
 	SERVERSINFO=()
 	SERVERSFORGING=()
 	SERVERSCONSENSUS=()
-	num=0
+	NUM=0
 	HIGHHEIGHT=0
 	
 	## Get info on all servers
@@ -60,20 +60,20 @@ while true; do
 		## Check if server is off
 		if ! [[ "$HEIGHT" =~ ^[0-9]+$ ]];
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${red}$SERVER is off?${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${RED}$SERVER is off?${RESETCOLOR}"
 			HEIGHT="0"
 			FORGE="false"
 			CONSENSUS="0"
 		else
 			## Get forging status of server
-			FORGE=$(curl --connect-timeout 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+			FORGE=$(curl --connect-timeout 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 			if [[ -z "$FORGE" ]]; ## If null, try one more time to get forging status
 			then
-				FORGE=$(curl --connect-timeout 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
+				FORGE=$(curl --connect-timeout 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 			fi
 			if [[ "$FORGE" == "true" ]]; ## Current server forging
 			then
-				FORGING=$num
+				FORGING=$NUM
 			fi
 		fi
 		
@@ -83,43 +83,43 @@ while true; do
 			HIGHHEIGHT=$HEIGHT
 		fi
 		
-		SERVERSINFO[$num]=$HEIGHT
-		SERVERSFORGING[$num]=$FORGE
-		SERVERSCONSENSUS[$num]=$CONSENSUS
+		SERVERSINFO[$NUM]=$HEIGHT
+		SERVERSFORGING[$NUM]=$FORGE
+		SERVERSCONSENSUS[$NUM]=$CONSENSUS
 		date +"%Y-%m-%d %H:%M:%S || $SERVER - Height:$HEIGHT - Consensus:$CONSENSUS - Forging:$FORGE"
 		
-		((num++))
+		((NUM++))
 	done
 	
-	num=0
+	NUM=0
 	## Check if any servers are forging
 	if ! [[ ${SERVERSFORGING[*]} =~ "true" ]];
 	then
 		for SERVER in ${SERVERS[@]}
 		do
-			diff=$(( $HIGHHEIGHT - ${SERVERSINFO[$num]} ))
-			if [ "$diff" -lt "4" ] && [ "${SERVERSCONSENSUS[$num]}" -gt "50" ]; 
+			DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$NUM]} ))
+			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 			then
-				date +"%Y-%m-%d %H:%M:%S || ${yellow}No node forging.  Starting on $SERVER${resetColor}"
+				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}No node forging.  Starting on $SERVER${RESETCOLOR}"
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-				PREVIOUSFORGING=$num
+				PREVIOUSFORGING=$NUM
 				break ## Exit loop once we find the first server at an acceptable height and consensus
 			fi
-			((num++))
+			((NUM++))
 		done
 		continue  ## Start back at top of loop, now that one server is forging
 	fi
 	
 	## Check that only one server is forging
 	FORGINGCOUNT=0
-	for fstatus in ${SERVERSFORGING[*]}; do
-		if [[ $fstatus =~ true ]]; then
+	for FSTATUS in ${SERVERSFORGING[*]}; do
+		if [[ $FSTATUS =~ true ]]; then
 			(( FORGINGCOUNT++ ))
 		fi
 	done 
 	if [ "$FORGINGCOUNT" -gt "1" ]
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${red}Multiple servers forging!${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${RED}Multiple servers forging!${RESETCOLOR}"
 			for SERVER in ${SERVERS[@]}
 			do
 				## Disable forging on all servers first
@@ -127,12 +127,12 @@ while true; do
 			done
 			for index in "${!SERVERS[@]}"
 			do
-				diff=$(( $HIGHHEIGHT - ${SERVERSINFO[$index]} ))
-				if [ "$diff" -lt "4" ] && [ "${SERVERSCONSENSUS[$num]}" -gt "50" ]; 
+				DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$index]} ))
+				if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 				then
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
 					PREVIOUSFORGING=$index
-					date +"%Y-%m-%d %H:%M:%S || ${cyan}Setting forging to ${SERVERS[$index]}${resetColor}"
+					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Setting forging to ${SERVERS[$index]}${RESETCOLOR}"
 					break ## Exit loop once we find the first server at an acceptable height and consensus
 				fi
 			done
@@ -140,7 +140,7 @@ while true; do
 
 	if [[ $PREVIOUSFORGING != $FORGING ]];
 	then
-		date +"%Y-%m-%d %H:%M:%S || ${yellow}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 30 seconds${resetColor}"
+		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 30 seconds${RESETCOLOR}"
 		sleep 24
 	else  ## Same server still forging, check that everything still looks good on it
 		date +"%Y-%m-%d %H:%M:%S || Highest Height: $HEIGHT"
@@ -148,22 +148,22 @@ while true; do
 		##Check that it is the main server forging
 		if [ "$FORGING" != "0" ];
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${yellow}Main server not forging${resetColor}"
-			diff=$(( $HIGHHEIGHT - ${SERVERSINFO[0]} ))
-			if [ "$diff" -lt "4" ] && [ "${SERVERSCONSENSUS[0]}" -gt "50" ]; 
+			date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Main server not forging${RESETCOLOR}"
+			DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[0]} ))
+			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[0]}" -gt "50" ]; 
 			then
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$FORGING]}""$PRTS"/api/delegates/forging/disable
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[0]}""$PRTS"/api/delegates/forging/enable
 				PREVIOUSFORGING=0
-				date +"%Y-%m-%d %H:%M:%S || ${cyan}Setting forging to back to main server: ${SERVERS[0]}${resetColor}"
+				date +"%Y-%m-%d %H:%M:%S || ${CYAN}Setting forging to back to main server: ${SERVERS[0]}${RESETCOLOR}"
 				continue ## Exit loop once if we can set forging back to main server
 			fi
 		fi
 	
-		diff=$(( $HIGHHEIGHT - ${SERVERSINFO[$FORGING]} ))
-		if [ "$diff" -gt "3" ]
+		DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$FORGING]} ))
+		if [ "$DIFF" -gt "3" ]
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${red}${SERVERS[$FORGING]} too low of height.${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${RED}${SERVERS[$FORGING]} too low of height.${RESETCOLOR}"
 			for SERVER in ${SERVERS[@]}
 			do
 				## Disable forging on all servers first
@@ -171,12 +171,12 @@ while true; do
 			done
 			for index in "${!SERVERS[@]}"
 			do
-				diff=$(( $HIGHHEIGHT - ${SERVERSINFO[$index]} ))
-				if [ "$diff" -lt "4" ] && [ "${SERVERSCONSENSUS[$num]}" -gt "50" ]; 
+				DIFF=$(( $HIGHHEIGHT - ${SERVERSINFO[$index]} ))
+				if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 				then
 					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
 					FORGING=$index
-					date +"%Y-%m-%d %H:%M:%S || ${cyan}Switching to ${SERVERS[$index]}${resetColor}"
+					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to ${SERVERS[$index]}${RESETCOLOR}"
 					break ## Exit loop once we find the first server at an acceptable height and consensus
 				fi
 			done
