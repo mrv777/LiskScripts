@@ -86,7 +86,7 @@ do
 			if [[ -n "$FORGEDBLOCKLOG" ]];
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${GREEN}$FORGEDBLOCKLOG${RESETCOLOR}"
-				FORGEDDELAY=20
+				FORGEDDELAY=40
 			fi
 		elif [[ "$FORGEDDELAY" -gt "0" ]]
 		then
