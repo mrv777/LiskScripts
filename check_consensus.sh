@@ -17,10 +17,10 @@ SERVERS=()
 size=$( echo "$CONFIGFILE" | jq '.servers | length') 
 i=0
 
-while [ $i -le $size ]    
+while [ $i -le "$size" ]    
 do
 	SERVERS[$i]=$(echo "$CONFIGFILE" | jq -r --argjson i $i '.servers[$i]')
-    i=`expr $i + 1`
+	i=$((i + 1))
 done
 ###
 #########################
@@ -30,11 +30,11 @@ TXTDELAY=0
 FORGEDDELAY=0
 
 # Set colors
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-CYAN=`tput setaf 6`
-RESETCOLOR=`tput sgr0`
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+RESETCOLOR=$(tput sgr0)
 
 ## Log start of script
 date +"%Y-%m-%d %H:%M:%S || ${GREEN}Starting MrV's consensus script${RESETCOLOR}"
@@ -55,7 +55,7 @@ function SyncState()
 	while [[ -z $result || $result != 'false' ]]
 	do
 		date +"%Y-%m-%d %H:%M:%S || Blockchain syncing"
-		result=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync" | jq '.syncing')
+		result=$(curl --connect-timeout 3 -s "http://$SRV1$PRT/api/loader/status/sync" | jq '.syncing')
 		sleep 2
 	done
 
@@ -103,7 +103,7 @@ do
 			if [[ $delegates == *"$pbk"* ]];
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low. Looking to switch server before reload.${RESETCOLOR}"
-				for SERVER in ${SERVERS[@]}
+				for SERVER in "${SERVERS[@]}"
 				do
 					## Get next server's height and consensus
 					SERVERINFO=$(curl --connect-timeout 3 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
@@ -146,7 +146,7 @@ do
 			if [[ $delegates == *"$pbk"* ]];
 			then
 			date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging soon, but your node is recovering. Looking to switch server while recovering.${RESETCOLOR}"
-				for SERVER in ${SERVERS[@]}
+				for SERVER in "${SERVERS[@]}"
 				do
 					## Get next server's height and consensus
 					SERVERINFO=$(curl --connect-timeout 3 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
@@ -193,7 +193,7 @@ do
 			DISABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
 			if [ "$DISABLEFORGE" = "true" ];
 			then
-				for SERVER in ${SERVERS[@]}
+				for SERVER in "${SERVERS[@]}"
 				do
 					ENABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
 					if [ "$ENABLEFORGE" = "true" ];
