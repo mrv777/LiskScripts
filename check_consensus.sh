@@ -70,6 +70,10 @@ do
 	FORGE=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$pbk| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		## Get current server's height and consensus
+		SERVERLOCAL=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
+		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
+		CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
 		## Get recent log
 		LOG=$(tail ~/lisk-main/logs/lisk.log -n 10)
 		
@@ -99,11 +103,6 @@ do
 			if [[ $delegates == *"$pbk"* ]];
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low. Looking to switch server before reload.${RESETCOLOR}"
-				## Get current server's height and consensus
-				SERVERLOCAL=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
-				HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
-				CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
-
 				for SERVER in "${SERVERS[@]}"
 				do
 					## Get next server's height and consensus
@@ -146,12 +145,7 @@ do
 			date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Node is recovering.  Looking for delegate forging soon matching $pbk${RESETCOLOR}"
 			if [[ $delegates == *"$pbk"* ]];
 			then
-				date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging soon, but your node is recovering. Looking to switch server while recovering.${RESETCOLOR}"
-				## Get current server's height and consensus
-				SERVERLOCAL=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
-				HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
-				CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
-				
+			date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging soon, but your node is recovering. Looking to switch server while recovering.${RESETCOLOR}"
 				for SERVER in "${SERVERS[@]}"
 				do
 					## Get next server's height and consensus
@@ -217,10 +211,6 @@ do
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 30 seconds to update running status to not overcrowd log
 		then
-			## Get current server's height and consensus
-			SERVERLOCAL=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
-			HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
-			CONSENSUSLOCAL=$( echo "$SERVERLOCAL" | jq '.consensus')
 			date +"%Y-%m-%d %H:%M:%S || ${GREEN}Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL${RESETCOLOR}"
 			TXTDELAY=0
 		fi
