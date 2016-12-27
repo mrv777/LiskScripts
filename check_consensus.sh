@@ -177,14 +177,15 @@ do
 			fi
 		fi
 
-		## Check log for Inadequate consensus or fork 5 while forging
+		## Check log for Inadequate consensus or Fork & Forged while forging
 		INADEQUATE=$( echo "$LOG" | grep 'Inadequate')
-		FORK5=$( echo "$LOG" | grep '"cause":5')
-		if [ -n "$INADEQUATE" ] || [ -n "$FORK5" ] ;
+		FORK=$( echo "$LOG" | grep 'Fork')
+		FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
+		if [ -n "$INADEQUATE" ] || ([ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ]);
 		then
-			if [ -n "$FORK5" ];
+			if [ -n "$FORK" ];
 			then
-				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Fork 5 in log.${RESETCOLOR}"
+				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Fork and Forged in log.${RESETCOLOR}"
 			else
 				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Inadequate consensus to forge.${RESETCOLOR}"
 			fi
