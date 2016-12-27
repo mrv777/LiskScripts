@@ -139,7 +139,7 @@ do
 		FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
 		if [ -n "$INADEQUATE" ] || ([ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ]);
 		then
-			if [ -n "$FORK" ];
+			if [ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ];
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Fork and Forged in log.${RESETCOLOR}"
 			else
