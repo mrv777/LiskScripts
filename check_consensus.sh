@@ -93,50 +93,6 @@ do
 			((FORGEDDELAY--))
 		fi
 
-		## If consensus is less than 51 and we are forging soon, try a reload to get new peers
-		## Management script should switch forging server during reload
-		## from Nerigal
-		if [ "$CONSENSUSLOCAL" -lt "51" ];
-		then
-			delegates=$(curl --connect-timeout 3 -s "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
-			date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Low consensus of $CONSENSUSLOCAL.  Looking for delegate forging soon matching $pbk${RESETCOLOR}"
-			if [[ $delegates == *"$pbk"* ]];
-			then
-				date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low. Looking to switch server before reload.${RESETCOLOR}"
-				for SERVER in "${SERVERS[@]}"
-				do
-					## Get next server's height and consensus
-					SERVERINFO=$(curl --connect-timeout 3 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
-					HEIGHT=$( echo "$SERVERINFO" | jq '.height')
-					CONSENSUS=$( echo "$SERVERINFO" | jq '.consensus')
-
-					## Make sure next server is not more than 3 blocks behind this server and consensus is better, then switch
-					if [[  -n "$HEIGHT" ]];
-					then
-						diff=$(( $HEIGHTLOCAL - $HEIGHT ))
-					else
-						diff="999"
-					fi
-					## if [ "$diff" -lt "3" ] && [ "$CONSENSUS" -gt "$CONSENSUSLOCAL" ]; ## Removed for now as I believe consensus read from API isn't updated every second to be fully accurate
-					if [ "$diff" -lt "3" ]; 
-					then
-						DISABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
-						if [ "$DISABLEFORGE" = "true" ];
-						then
-							curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-							date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${RESETCOLOR}"
-							ChangeDirectory
-							bash lisk.sh reload
-							sleep 20
-							SyncState
-							break
-						else
-							date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to disable forging on $SRV1 with low consensus before forging${RESETCOLOR}"
-						fi
-					fi
-				done
-			fi
-		fi
 		## Check log if node is recovering close to forging time
 		LASTLINE=$( echo "$LOG" | grep 'starting recovery')
 		if [[ -n "$LASTLINE" ]];
