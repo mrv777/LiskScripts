@@ -25,8 +25,8 @@ done
 ###
 #########################
 
-#Set text delay at 0
-TXTDELAY=0
+#Set text delay and forging log delays
+TXTDELAY=1
 FORGEDDELAY=0
 
 # Set colors
@@ -209,19 +209,19 @@ do
 			fi
 		fi
 		(( ++TXTDELAY ))
-		if [[ "$TXTDELAY" -eq "60" ]];  ## Wait 30 seconds to update running status to not overcrowd log
+		if [[ "$TXTDELAY" -gt "60" ]];  ## Wait 30 seconds to update running status to not overcrowd log
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${GREEN}Still working at block $HEIGHTLOCAL with a consensus of $CONSENSUSLOCAL${RESETCOLOR}"
-			TXTDELAY=0
+			TXTDELAY=1
 		fi
-			sleep 0.5
+		sleep 0.5
 	else
 		(( ++TXTDELAY ))
-		if [[ "$TXTDELAY" -eq "30" ]];  ## Wait 30 seconds to update running status to not overcrowd log
+		if [[ "$TXTDELAY" -gt "30" ]];  ## Wait 30 seconds to update running status to not overcrowd log
 		then
 			date +"%Y-%m-%d %H:%M:%S || This server is not forging"
-			TXTDELAY=0
+			TXTDELAY=1
 		fi
-			sleep 1
+		sleep 1
 	fi
 done
