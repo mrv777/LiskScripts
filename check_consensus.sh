@@ -25,9 +25,9 @@ done
 ###
 #########################
 
-#Set text delay and forging log delays
+#Set text delay and forging log
 TXTDELAY=1
-FORGEDDELAY=0
+LASTFORGED=""
 
 # Set colors
 RED=$(tput setaf 1)
@@ -77,20 +77,13 @@ do
 		## Get recent log
 		LOG=$(tail ~/lisk-main/logs/lisk.log -n 10)
 		
-		## Only look for forged block in log if we didn't just log it
-		if [[ "$FORGEDDELAY" -eq "0" ]];
+		## Look for a forged block in logs
+		FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
+		## Display in log if a new block forged and we didn't just display this one
+		if [ -n "$FORGEDBLOCKLOG" ] && [ "$LASTFORGED" != "$FORGEDBLOCKLOG" ];
 		then
-			## Log when a block is forged
-			FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
-
-			if [[ -n "$FORGEDBLOCKLOG" ]];
-			then
-				date +"%Y-%m-%d %H:%M:%S || ${GREEN}$FORGEDBLOCKLOG${RESETCOLOR}"
-				FORGEDDELAY=60
-			fi
-		elif [[ "$FORGEDDELAY" -gt "0" ]]
-		then
-			((FORGEDDELAY--))
+			date +"%Y-%m-%d %H:%M:%S || ${GREEN}$FORGEDBLOCKLOG${RESETCOLOR}"
+			LASTFORGED=$FORGEDBLOCKLOG
 		fi
 
 		## Check log if node is recovering close to forging time
