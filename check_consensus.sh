@@ -11,7 +11,7 @@ LDIRECTORY=$( echo "$CONFIGFILE" | jq -r '.lisk_directory')
 SRV1=$( echo "$CONFIGFILE" | jq -r '.srv1')
 PRT=$( echo "$CONFIGFILE" | jq -r '.port')
 PRTS=$( echo "$CONFIGFILE" | jq -r '.https_port')
-PBK=$( echo "$CONFIGFILE" | jq -r '.PBK')
+PBK=$( echo "$CONFIGFILE" | jq -r '.pbk')
 SERVERS=()
 ### Get servers array
 size=$( echo "$CONFIGFILE" | jq '.servers | length') 
