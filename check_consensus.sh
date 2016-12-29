@@ -196,7 +196,7 @@ do
 								date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${RESETCOLOR}"
 								ChangeDirectory
 								bash lisk.sh reload
-								sleep 20
+								sleep 15
 								SyncState
 								break
 							else
@@ -205,6 +205,8 @@ do
 						fi
 					done
 				fi
+			else
+				date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging within next 20 seconds, too soon to try a reload.${RESETCOLOR}"
 			fi
 		fi
 		
