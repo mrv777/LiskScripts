@@ -1,4 +1,4 @@
-## Version 0.9.3
+## Version 0.9.4
 #!/bin/bash
 
 ## Check for config file
@@ -99,9 +99,15 @@ while true; do
 			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}No node forging.  Starting on $SERVER${RESETCOLOR}"
-				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-				PREVIOUSFORGING=$NUM
-				break ## Exit loop once we find the first server at an acceptable height and consensus
+				ENABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
+				if [ "$ENABLEFORGE" = "true" ];
+				then
+					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER to try and forge.${RESETCOLOR}"
+					PREVIOUSFORGING=$NUM
+					break ## Leave servers loop
+				else
+					date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on $SERVER.  Trying next server.${RESETCOLOR}"
+				fi
 			fi
 			((NUM++))
 		done
