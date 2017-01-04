@@ -1,5 +1,5 @@
 ## control.sh
-## Version 0.9.3
+## Version 0.9.4
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 #!/bin/bash
 
@@ -170,6 +170,20 @@ status() {
 	fi
 }
 
+logs() {
+	LOG_FILES=""
+	if [[ -e "$LOG_FILE" ]] ; then
+		LOG_FILES+="-cT ANSI "$LOG_FILE" "
+	fi
+	if [[ -e "$CONSENSUS_LOG_FILE" ]] ; then
+		LOG_FILES+="-cT ANSI "$CONSENSUS_LOG_FILE" "
+	fi
+	if [[ -e "$MANAGE_LOG_FILE" ]] ; then
+		LOG_FILES+="-cT ANSI "$MANAGE_LOG_FILE" "
+	fi
+	multitail $LOG_FILES
+}
+
 usage() {
   echo "Usage: $0 <start|stop|upgrade>"
   echo "start			-- starts consensus & height_rebuild scripts"
@@ -181,6 +195,7 @@ usage() {
   echo "stoph			-- stops height_rebuild script"
   echo "stopm         		-- stops manage script"
   echo "status          	-- check if scripts are running"
+  echo "logs          		-- display all logs (requires multitail)"
   echo "upgrade       		-- upgrades and runs both scripts"
 }
 
@@ -219,6 +234,9 @@ case $1 in
 ;;
 "status" ) 
 	status
+;;
+"logs" ) 
+	logs
 ;;
 "upgrade" ) 
 	check_height_running

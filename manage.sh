@@ -1,4 +1,4 @@
-## Version 0.9.3
+## Version 0.9.4
 #!/bin/bash
 
 ## Check for config file
@@ -99,9 +99,15 @@ while true; do
 			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}No node forging.  Starting on $SERVER${RESETCOLOR}"
-				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-				PREVIOUSFORGING=$NUM
-				break ## Exit loop once we find the first server at an acceptable height and consensus
+				ENABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
+				if [ "$ENABLEFORGE" = "true" ];
+				then
+					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER to try and forge.${RESETCOLOR}"
+					PREVIOUSFORGING=$NUM
+					break ## Leave servers loop
+				else
+					date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on $SERVER.  Trying next server.${RESETCOLOR}"
+				fi
 			fi
 			((NUM++))
 		done
@@ -128,18 +134,23 @@ while true; do
 				DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[$index]} ))
 				if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 				then
-					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
-					PREVIOUSFORGING=$index
-					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Setting forging to ${SERVERS[$index]}${RESETCOLOR}"
-					break ## Exit loop once we find the first server at an acceptable height and consensus
+					ENABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable | jq '.success')
+					if [ "$ENABLEFORGE" = "true" ];
+					then
+						PREVIOUSFORGING=$index
+						date +"%Y-%m-%d %H:%M:%S || ${CYAN}Setting forging to ${SERVERS[$index]}${RESETCOLOR}"
+						break ## Exit loop once we find the first server at an acceptable height and consensus
+					else
+						date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on ${SERVERS[$index]}.  Trying next server.${RESETCOLOR}"
+					fi
 				fi
 			done
 		fi
 
 	if [[ $PREVIOUSFORGING != "$FORGING" ]];
 	then
-		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 30 seconds${RESETCOLOR}"
-		sleep 24
+		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 15 seconds${RESETCOLOR}"
+		sleep 9
 	else  ## Same server still forging, check that everything still looks good on it
 		date +"%Y-%m-%d %H:%M:%S || Highest Height: $HEIGHT"
 		
@@ -172,10 +183,15 @@ while true; do
 				DIFF=$(( HIGHHEIGHT - ${SERVERSINFO[$index]} ))
 				if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 				then
-					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable
-					FORGING=$index
-					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to ${SERVERS[$index]}${RESETCOLOR}"
-					break ## Exit loop once we find the first server at an acceptable height and consensus
+					ENABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$index]}""$PRTS"/api/delegates/forging/enable | jq '.success')
+					if [ "$ENABLEFORGE" = "true" ];
+					then
+						FORGING=$index
+						date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to ${SERVERS[$index]}${RESETCOLOR}"
+						break ## Exit loop once we find the first server at an acceptable height and consensus
+					else
+						date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on ${SERVERS[$index]}.  Trying next server.${RESETCOLOR}"
+					fi
 				fi
 			done
 		fi
