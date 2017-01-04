@@ -149,8 +149,8 @@ while true; do
 
 	if [[ $PREVIOUSFORGING != "$FORGING" ]];
 	then
-		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 30 seconds${RESETCOLOR}"
-		sleep 24
+		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 15 seconds${RESETCOLOR}"
+		sleep 9
 	else  ## Same server still forging, check that everything still looks good on it
 		date +"%Y-%m-%d %H:%M:%S || Highest Height: $HEIGHT"
 		
