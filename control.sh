@@ -173,15 +173,15 @@ status() {
 logs() {
 	LOG_FILES=""
 	if [[ -e "$LOG_FILE" ]] ; then
-		LOG_FILES+=$LOG_FILE" "
+		LOG_FILES+="-cT ANSI "$LOG_FILE" "
 	fi
 	if [[ -e "$CONSENSUS_LOG_FILE" ]] ; then
-		LOG_FILES+=$CONSENSUS_LOG_FILE" "
+		LOG_FILES+="-cT ANSI "$CONSENSUS_LOG_FILE" "
 	fi
 	if [[ -e "$MANAGE_LOG_FILE" ]] ; then
-		LOG_FILES+=$MANAGE_LOG_FILE" "
+		LOG_FILES+="-cT ANSI "$MANAGE_LOG_FILE" "
 	fi
-	multitail -cT ansi $LOG_FILES
+	multitail $LOG_FILES
 }
 
 usage() {
