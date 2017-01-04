@@ -1,4 +1,4 @@
-# Lisk Delegate Scripts  (BETA v0.9.3)
+# Lisk Delegate Scripts  (BETA v0.9.4)
 
 ## Thank you
 Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, stoner19, punkrock, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
@@ -12,6 +12,7 @@ This is the wrapper script for check_height_and_rebuild.sh and check_consensus.s
 * stop              -- stops both scripts
 * stopc             -- stops consensus script
 * stoph             -- stops height_rebuild script
+* logs              -- display all log files (requires multitail)
 * upgrade           -- upgrades and runs runs both scripts
 
 #### How to run:
@@ -27,6 +28,7 @@ To check the logs and what the script is going:
 
 * `tail -f heightRebuild.log`
 * `tail -f consensus.log`
+* `bash control.sh logs` (requires multitail)
 
 ## My consensus check script
 
@@ -49,7 +51,7 @@ Compares the height of your 100 connected peers and gets the highest height.  Th
 
 ### manage.sh
 **User does not need to directly do anything with this.  control.sh interfaces with it automatically**
-This script will check the block heights of all listed servers.  It will attempt to have one and only one server forging and prefer to have server 1 do the forging.  If the forging server swtiches by something other then this script, it will pause for 30 seconds and then check the status of the servers after that.
+This script will check the block heights of all listed servers.  It will attempt to have one and only one server forging and prefer to have server 1 do the forging.  If the forging server swtiches by something other then this script, it will pause for 15 seconds and then check the status of the servers after that.
 
 #### How to run:
 
@@ -60,5 +62,6 @@ This script will check the block heights of all listed servers.  It will attempt
 To check the logs and what the script is going:
 
 * `tail -f manage.log`
+* `bash control.sh logs` (requires multitail)
 
 *Donation Address: 3532362465127676136L*
