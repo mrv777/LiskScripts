@@ -162,10 +162,19 @@ while true; do
 			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[0]}" -gt "50" ]; 
 			then
 				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[$FORGING]}""$PRTS"/api/delegates/forging/disable
-				curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[0]}""$PRTS"/api/delegates/forging/enable
-				PREVIOUSFORGING=0
-				date +"%Y-%m-%d %H:%M:%S || ${CYAN}Setting forging to back to main server: ${SERVERS[0]}${RESETCOLOR}"
-				continue ## Exit loop once if we can set forging back to main server
+				ENABLEFORGE=$(curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[0]}""$PRTS"/api/delegates/forging/enable | jq '.success')
+				if [ "$ENABLEFORGE" = "true" ];
+				then
+					PREVIOUSFORGING=0
+					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Setting forging to back to main server: ${SERVERS[0]}${RESETCOLOR}"
+					continue ## Exit loop once if we can set forging back to main server
+				else
+					date +"%Y-%m-%d %H:%M:%S || ${RED}Failed setting forging to back to main server: ${SERVERS[0]}. Trying second server: ${SERVERS[1]}${RESETCOLOR}"
+					curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"${SERVERS[1]}""$PRTS"/api/delegates/forging/enable
+					PREVIOUSFORGING=1
+					sleep 30 ## TEMPORARY CODE, don't want to keep tryig main server if there is an issue
+					continue ## Exit loop
+				fi
 			fi
 		fi
 	
