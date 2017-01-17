@@ -1,4 +1,4 @@
-## Version 0.9.4
+## Version 0.9.5
 #!/bin/bash
 
 ## Check for config file
@@ -116,7 +116,7 @@ do
 						if [ "$DISABLEFORGE" = "true" ];
 						then
 							curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-							date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER with a consensus of $CONSENSUS as your node is recovering.${RESETCOLOR}"
+							date +"%Y-%m-%d %H:%M:%S || ${CYAN}Successsfully switching to Server $SERVER with a consensus of $CONSENSUS as your node is recovering.${RESETCOLOR}"
 							break
 						else
 							date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to disable forging on $SRV1 that is recovering before forging${RESETCOLOR}"
@@ -148,7 +148,7 @@ do
 					ENABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
 					if [ "$ENABLEFORGE" = "true" ];
 					then
-						date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER to try and forge.${RESETCOLOR}"
+						date +"%Y-%m-%d %H:%M:%S || ${CYAN}Successsfully switching to Server $SERVER to try and forge.${RESETCOLOR}"
 						break ## Leave servers loop
 					else
 						date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on $SERVER.  Trying next server.${RESETCOLOR}"
@@ -193,7 +193,7 @@ do
 							if [ "$DISABLEFORGE" = "true" ];
 							then
 								curl -s -S --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 4 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-								date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${RESETCOLOR}"
+								date +"%Y-%m-%d %H:%M:%S || ${CYAN}Successsfully switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${RESETCOLOR}"
 								ChangeDirectory
 								bash lisk.sh reload
 								sleep 15
