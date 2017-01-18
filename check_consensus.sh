@@ -126,15 +126,14 @@ do
 			fi
 		fi
 
-		## Check log for Inadequate consensus or Fork & Forged while forging
+		## Check log for Inadequate consensus or Forged in log.  If we just forged switch to another server to make sure we forged on the correct chain
 		INADEQUATE=$( echo "$LOG" | grep 'Inadequate')
-		FORK=$( echo "$LOG" | grep 'Fork')
 		FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
-		if [ -n "$INADEQUATE" ] || ([ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ]);
+		if [ -n "$INADEQUATE" ] || [ -n "$FORGEDBLOCKLOG" ];
 		then
-			if [ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ];
+			if [ -n "$FORGEDBLOCKLOG" ];
 			then
-				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Fork and Forged in log.${RESETCOLOR}"
+				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}INFO: Forged in log.${RESETCOLOR}"
 			else
 				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Inadequate consensus to forge.${RESETCOLOR}"
 			fi
@@ -159,19 +158,26 @@ do
 			fi
 		fi
 		
-		## If consensus is less than 51 and we are forging soon (but not one of the next 2), try a reload to get new peers
+		## If consensus is less than 51 or there was a fork in the log and we are forging soon (but not one of the next 2), try a reload to get new peers
 		## Management script should switch forging server during reload
 		## from Nerigal
-		if [ "$CONSENSUSLOCAL" -lt "51" ];
+		FORK=$( echo "$LOG" | grep 'Fork')
+		if [ "$CONSENSUSLOCAL" -lt "51" ] || [ -n "$FORK" ];
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Low consensus of $CONSENSUSLOCAL.  Looking for delegate forging soon matching $PBK${RESETCOLOR}"
+			if [ -n "$FORK" ];
+			then
+				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}WARNING: Fork in log.  Looking for delegate forging soon matching $PBK${RESETCOLOR}"
+			else
+				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Low consensus of $CONSENSUSLOCAL.  Looking for delegate forging soon matching $PBK${RESETCOLOR}"
+			fi
+		
 			DELEGATESNEXT=$(curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 "http://"$SRV1""$PRT"/api/delegates/getNextForgers?limit=2" | jq '.delegates')
 			if [[ $DELEGATESNEXT != *"$PBK"* ]];
 			then
 				DELEGATESSOON=$(curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
 				if [[ $DELEGATESSOON == *"$PBK"* ]];
 				then
-					date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low. Looking to switch server before reload.${RESETCOLOR}"
+					date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low or there was a fork. Looking to switch server before reload.${RESETCOLOR}"
 					for SERVER in "${SERVERS[@]}"
 					do
 						## Get next server's height and consensus
