@@ -1,4 +1,4 @@
-## Version 0.9.5
+## Version 0.9.5.1
 #!/bin/bash
 
 ## Check for config file
@@ -28,6 +28,7 @@ done
 #Set text delay and forging log
 TXTDELAY=1
 LASTFORGED=""
+FORGINGINLOG=0
 
 # Set colors
 RED=$(tput setaf 1)
@@ -70,6 +71,11 @@ do
 	FORGE=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		if [[ "$FORGINGINLOG" == 0 ]]; ## Log when forging started on node
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${GREEN}Forging started on node.${RESETCOLOR}"
+			FORGINGINLOG=1
+		fi
 		## Get current server's height and consensus
 		SERVERLOCAL=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
 		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
@@ -126,14 +132,15 @@ do
 			fi
 		fi
 
-		## Check log for Inadequate consensus or Forged in log.  If we just forged switch to another server to make sure we forged on the correct chain
+		## Check log for Inadequate consensus or Fork & Forged while forging
 		INADEQUATE=$( echo "$LOG" | grep 'Inadequate')
 		FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
-		if [ -n "$INADEQUATE" ] || [ -n "$FORGEDBLOCKLOG" ];
+		FORK=$( echo "$LOG" | grep 'Fork')
+		if [ -n "$INADEQUATE" ] || ([ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ]);
 		then
-			if [ -n "$FORGEDBLOCKLOG" ];
+			if [ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ];
 			then
-				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}INFO: Forged in log.${RESETCOLOR}"
+				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Fork and Forged in log.${RESETCOLOR}"
 			else
 				date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Inadequate consensus to forge.${RESETCOLOR}"
 			fi
@@ -161,7 +168,6 @@ do
 		## If consensus is less than 51 or there was a fork in the log and we are forging soon (but not one of the next 2), try a reload to get new peers
 		## Management script should switch forging server during reload
 		## from Nerigal
-		FORK=$( echo "$LOG" | grep 'Fork')
 		if [ "$CONSENSUSLOCAL" -lt "51" ] || [ -n "$FORK" ];
 		then
 			if [ -n "$FORK" ];
@@ -230,6 +236,7 @@ do
 			date +"%Y-%m-%d %H:%M:%S || This server is not forging"
 			TXTDELAY=1
 		fi
+		FORGINGINLOG=0
 		sleep 1
 	fi
 done
