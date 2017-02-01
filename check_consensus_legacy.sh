@@ -1,4 +1,4 @@
-## Version 0.9.5
+## Version 0.9.5.1
 #!/bin/bash
 
 ## Check for config file
@@ -34,12 +34,12 @@ RESETCOLOR=$(tput sgr0)
 date +"%Y-%m-%d %H:%M:%S || ${GREEN}Starting MrV's legacy consensus script${RESETCOLOR}"
 
 while true; do
+	## Get recent log
+ 	INADEQUATE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
+	date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Inadequate consensus to forge.${RESETCOLOR}"
+	
 	if [ -n "$INADEQUATE" ];
 	then
-		## Get recent log
- 		INADEQUATE=$(tail ~/lisk-main/logs/lisk.log -n 2| grep 'Inadequate')
-		date +"%Y-%m-%d %H:%M:%S || ${RED}WARNING: Inadequate consensus to forge.${RESETCOLOR}"
-	
 		## Disable forging on local server first.  If successful, loop through servers until we are able to enable forging on one
 		DISABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SRV1""$PRTS"/api/delegates/forging/disable | jq '.success')
 		if [ "$DISABLEFORGE" = "true" ];
