@@ -106,7 +106,14 @@ while true; do
 					PREVIOUSFORGING=$NUM
 					break ## Leave servers loop
 				else
-					date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on $SERVER.  Trying next server.${RESETCOLOR}"
+					CHECKFORGE=$(curl --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
+					if [ "$CHECKFORGE" = "true" ];
+					then
+						date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Failed to enable forging on $SERVER.  However, it seems to be enabled now."
+						break ## Leave loop since a server is forging somehow
+					else
+						date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on $SERVER.  Trying next server.${RESETCOLOR}"
+					fi
 				fi
 			fi
 			((NUM++))
