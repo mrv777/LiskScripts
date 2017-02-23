@@ -74,7 +74,7 @@ function SyncState()
 		(( ++TIMER ))
 		if [ "$TIMER" -gt "600" ]; 
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 10 minutes.  We will try a rebuild.${resetColor}"
+			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 20 minutes.  We will try a rebuild.${resetColor}"
 			ChangeDirectory
 			find_newest_snap_rebuild
 			sleep 45
