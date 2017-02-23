@@ -1,5 +1,5 @@
 ## check_height_and_rebuild.sh
-## Version 0.9.2
+## Version 0.9.5.1
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## 
 ## Current snapshot sources and creation times
@@ -58,7 +58,7 @@ function SyncState()
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			sleep 45 ## Wait 45 seconds to make sure Lisk isn't just down for a rebuild
+			sleep 60 ## Wait 60 seconds to make sure Lisk isn't just down for a rebuild
 			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 			if [[ -z "$STATUS" ]];
 			then
@@ -72,12 +72,12 @@ function SyncState()
 		
 		## Check if loop has been running for too long
 		(( ++TIMER ))
-		if [ "$TIMER" -gt "300" ]; 
+		if [ "$TIMER" -gt "600" ]; 
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${yellow}WARNING: Blockchain has been trying to sync for 10 minutes.  We will try a rebuild.${resetColor}"
 			ChangeDirectory
 			find_newest_snap_rebuild
-			sleep 30
+			sleep 45
 			TIMER=0  ##Reset Timer
 		fi
 	done
@@ -171,7 +171,7 @@ local_height() {
 		CHECKSRV=`curl -s "http://$SRV/api/loader/status/sync"| jq '.height'`
 	done
 	diff=$(( $HEIGHT - $CHECKSRV ))
-	if [ "$diff" -gt "4" ]
+	if [ "$diff" -gt "5" ]
 	then
 		## Thank you doweig for better output formating
         	date +"%Y-%m-%d %H:%M:%S || ${yellow}Reloading! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
@@ -192,12 +192,12 @@ local_height() {
 		
 		## Rebuild if still out of sync after reload
 		diff=$(( $HEIGHT - $CHECKSRV ))
-		if [ "$diff" -gt "6" ]
+		if [ "$diff" -gt "7" ]
 		then
 			## Thank you doweig for better output formating
 			date +"%Y-%m-%d %H:%M:%S || ${red}Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 			find_newest_snap_rebuild
-			sleep 30
+			sleep 45
 			SyncState
 			#sleep 420
 			## Thank you corsaro for this improvement
