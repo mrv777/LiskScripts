@@ -1,4 +1,4 @@
-## Version 0.9.4
+## Version 0.9.5.1
 #!/bin/bash
 
 ## Check for config file
@@ -28,6 +28,7 @@ done
 #Set text delay and forging log
 TXTDELAY=1
 LASTFORGED=""
+FORGINGINLOG=0
 
 # Set colors
 RED=$(tput setaf 1)
@@ -70,6 +71,11 @@ do
 	FORGE=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		if [[ "$FORGINGINLOG" == 0 ]]; ## Log when forging started on node
+		then
+			date +"%Y-%m-%d %H:%M:%S || ${GREEN}Forging started on node.${RESETCOLOR}"
+			FORGINGINLOG=1
+		fi
 		## Get current server's height and consensus
 		SERVERLOCAL=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/loader/status/sync")
 		HEIGHTLOCAL=$( echo "$SERVERLOCAL" | jq '.height')
@@ -116,7 +122,7 @@ do
 						if [ "$DISABLEFORGE" = "true" ];
 						then
 							curl -s -S --connect-timeout 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-							date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER with a consensus of $CONSENSUS as your node is recovering.${RESETCOLOR}"
+							date +"%Y-%m-%d %H:%M:%S || ${CYAN}Successsfully switching to Server $SERVER with a consensus of $CONSENSUS as your node is recovering.${RESETCOLOR}"
 							break
 						else
 							date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to disable forging on $SRV1 that is recovering before forging${RESETCOLOR}"
@@ -128,8 +134,8 @@ do
 
 		## Check log for Inadequate consensus or Fork & Forged while forging
 		INADEQUATE=$( echo "$LOG" | grep 'Inadequate')
-		FORK=$( echo "$LOG" | grep 'Fork')
 		FORGEDBLOCKLOG=$( echo "$LOG" | grep 'Forged new block')
+		FORK=$( echo "$LOG" | grep 'Fork')
 		if [ -n "$INADEQUATE" ] || ([ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ]);
 		then
 			if [ -n "$FORK" ] && [ -n "$FORGEDBLOCKLOG" ];
@@ -148,7 +154,7 @@ do
 					ENABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
 					if [ "$ENABLEFORGE" = "true" ];
 					then
-						date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER to try and forge.${RESETCOLOR}"
+						date +"%Y-%m-%d %H:%M:%S || ${CYAN}Successsfully switching to Server $SERVER to try and forge.${RESETCOLOR}"
 						break ## Leave servers loop
 					else
 						date +"%Y-%m-%d %H:%M:%S || ${RED}Failed to enable forging on $SERVER.  Trying next server.${RESETCOLOR}"
@@ -159,19 +165,25 @@ do
 			fi
 		fi
 		
-		## If consensus is less than 51 and we are forging soon (but not one of the next 2), try a reload to get new peers
+		## If consensus is less than 51 or there was a fork in the log and we are forging soon (but not one of the next 2), try a reload to get new peers
 		## Management script should switch forging server during reload
 		## from Nerigal
-		if [ "$CONSENSUSLOCAL" -lt "51" ];
+		if [ "$CONSENSUSLOCAL" -lt "51" ] || [ -n "$FORK" ];
 		then
-			date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Low consensus of $CONSENSUSLOCAL.  Looking for delegate forging soon matching $PBK${RESETCOLOR}"
+			if [ -n "$FORK" ];
+			then
+				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}WARNING: Fork in log.  Looking for delegate forging soon matching $PBK${RESETCOLOR}"
+			else
+				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Low consensus of $CONSENSUSLOCAL.  Looking for delegate forging soon matching $PBK${RESETCOLOR}"
+			fi
+		
 			DELEGATESNEXT=$(curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 "http://"$SRV1""$PRT"/api/delegates/getNextForgers?limit=2" | jq '.delegates')
 			if [[ $DELEGATESNEXT != *"$PBK"* ]];
 			then
 				DELEGATESSOON=$(curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 "http://"$SRV1""$PRT"/api/delegates/getNextForgers" | jq '.delegates')
 				if [[ $DELEGATESSOON == *"$PBK"* ]];
 				then
-					date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low. Looking to switch server before reload.${RESETCOLOR}"
+					date +"%Y-%m-%d %H:%M:%S || ${RED}You are forging in next 100 seconds, but your consensus is too low or there was a fork. Looking to switch server before reload.${RESETCOLOR}"
 					for SERVER in "${SERVERS[@]}"
 					do
 						## Get next server's height and consensus
@@ -193,7 +205,7 @@ do
 							if [ "$DISABLEFORGE" = "true" ];
 							then
 								curl -s -S --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 4 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable
-								date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${RESETCOLOR}"
+								date +"%Y-%m-%d %H:%M:%S || ${CYAN}Successsfully switching to Server $SERVER with a consensus of $CONSENSUS as your consensus is too low.  We will try a reload.${RESETCOLOR}"
 								ChangeDirectory
 								bash lisk.sh reload
 								sleep 15
@@ -224,6 +236,7 @@ do
 			date +"%Y-%m-%d %H:%M:%S || This server is not forging"
 			TXTDELAY=1
 		fi
+		FORGINGINLOG=0
 		sleep 1
 	fi
 done

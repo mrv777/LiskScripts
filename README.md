@@ -1,7 +1,17 @@
-# Lisk Delegate Scripts  (BETA v0.9.4)
+# Lisk Delegate Scripts  (BETA v0.9.5.1)
 
 ## Thank you
 Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, stoner19, punkrock, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
+
+## Config settings
+* port                --http port for lisk API access                       (needed by check_consensus.sh){needed by manage.sh}
+* https_port          --https port for lisk API access                      (needed by check_consensus.sh){needed by manage.sh}
+* lisk_directory      --directory where lisk is installed                   (needed by check_consensus.sh)[needed by check_height_and_rebuild.sh]
+* pbk                 --Your account's public key                           (needed by check_consensus.sh){needed by manage.sh}
+* secret              --Your account's secret passphrase                    (needed by check_consensus.sh){needed by manage.sh}
+* manage_servers      --Array of servers for management script to use       {needed by manage.sh}
+* srv1                --Should always be localhost                          (needed by check_consensus.sh)
+* servers             --Array of servers for consensus script to switch to  (needed by check_consensus.sh)
 
 ## Control Script
 This is the wrapper script for check_height_and_rebuild.sh and check_consensus.sh.  You can run this on all forging servers.  You only need to use this script directly and not check_height_and_rebuild.sh or check_consensus.sh.  Commands are:
