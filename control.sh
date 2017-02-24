@@ -1,5 +1,5 @@
 ## control.sh
-## Version 0.9.4
+## Version 0.9.5.1
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 #!/bin/bash
 
@@ -116,7 +116,6 @@ upgrade_consensus() {
 	fi
 	
 	wget "https://raw.githubusercontent.com/mrv777/LiskScripts/master/check_consensus.sh"
-	vi check_consensus.sh
 	echo "Starting consensus Script"
 	nohup bash $CONSENSUS_SH_FILE -S $SRV  > $CONSENSUS_SH_FILE 2>&1&
 }
