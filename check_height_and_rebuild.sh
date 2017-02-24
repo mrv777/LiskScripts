@@ -197,7 +197,7 @@ local_height() {
 			## Thank you doweig for better output formating
 			date +"%Y-%m-%d %H:%M:%S || ${red}Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 			find_newest_snap_rebuild
-			sleep 45
+			sleep 60
 			SyncState
 			#sleep 420
 			## Thank you corsaro for this improvement
