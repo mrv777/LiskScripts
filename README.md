@@ -2,6 +2,7 @@
 
 ## Thank you
 Thank you to cc001, corsaro, liberspirita, wannabe_RoteBaron, hagie, isabella, stoner19, punkrock, Nerigal, doweig, and anyone I might have missed for their help and/or contributions.
+*Disclaimer: This is always a work in progress.  I provide no warrenty or guerentee :)*
 
 ## Config settings
 * port                --http port for lisk API access                       (needed by check_consensus.sh){needed by manage.sh}
