@@ -40,7 +40,6 @@ RESETCOLOR=$(tput sgr0)
 ## Log start of script
 date +"%Y-%m-%d %H:%M:%S || ${GREEN}Starting MrV's consensus script${RESETCOLOR}"
 
-
 # Set Lisk directory
 function ChangeDirectory(){
 	cd ~
@@ -68,9 +67,12 @@ function SyncState()
 while true;
 do
 	## Get forging status of server
+	date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Before Forge Check${RESETCOLOR}"
 	FORGE=$(curl --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -s "http://"$SRV1""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
+	date +"%Y-%m-%d %H:%M:%S || ${YELLOW}After Forge Check${RESETCOLOR}"
 	if [[ "$FORGE" == "true" ]]; ## Only check log and try to switch forging if needed, if server is currently forging
 	then
+		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}In forging part of if${RESETCOLOR}"
 		if [[ "$FORGINGINLOG" == 0 ]]; ## Log when forging started on node
 		then
 			date +"%Y-%m-%d %H:%M:%S || ${GREEN}Forging started on node.${RESETCOLOR}"
@@ -230,6 +232,7 @@ do
 		fi
 		sleep 0.5
 	else
+		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}In not forging part of if${RESETCOLOR}"
 		(( ++TXTDELAY ))
 		if [[ "$TXTDELAY" -gt "30" ]];  ## Wait 30 seconds to update running status to not overcrowd log
 		then
