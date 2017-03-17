@@ -160,7 +160,7 @@ while true; do
 		date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Different server forging! Previous=${SERVERS[$PREVIOUSFORGING]},Current=${SERVERS[$FORGING]}. Waiting 15 seconds${RESETCOLOR}"
 		sleep 9
 	else  ## Same server still forging, check that everything still looks good on it
-		date +"%Y-%m-%d %H:%M:%S || Highest Height: $HEIGHT"
+		date +"%Y-%m-%d %H:%M:%S || Highest Height: $HIGHHEIGHT"
 		
 		##Check that it is the main server forging
 		if [ "$FORGING" != "0" ];
