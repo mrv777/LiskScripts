@@ -52,7 +52,7 @@ function SyncState()
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			sleep 60 ## Wait 60 seconds to make sure Lisk isn't just down for a rebuild
+			sleep 90 ## Wait 90 seconds to make sure Lisk isn't just down for a rebuild
 			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 			if [[ -z "$STATUS" ]];
 			then
@@ -239,10 +239,11 @@ while true; do
 		fi
 	fi
 	
+	SyncState
 	top_height
 	local_height
 
 	## Thank you doweig for better output formating
 	date +"%Y-%m-%d %H:%M:%S || ${green}Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
-	sleep 10
+	sleep 8
 done
