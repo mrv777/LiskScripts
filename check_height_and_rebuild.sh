@@ -189,7 +189,7 @@ local_height() {
 			## Thank you doweig for better output formating
 			date +"%Y-%m-%d %H:%M:%S || ${red}Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 			find_newest_snap_rebuild
-			sleep 60
+			sleep 90
 			SyncState
 			#sleep 420
 			## Thank you corsaro for this improvement
@@ -227,7 +227,7 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
-		sleep 120 ## Wait 120 seconds to make sure Lisk isn't just down for a rebuild
+		sleep 90 ## Wait 90 seconds to make sure Lisk isn't just down for a rebuild
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
