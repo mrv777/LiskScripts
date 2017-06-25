@@ -1,4 +1,4 @@
-## Version 0.9.5.1
+## Version 0.9.5.2
 #!/bin/bash
 
 ## Check for config file
@@ -47,10 +47,10 @@ while true; do
 	for SERVER in "${SERVERS[@]}"
 	do
 		## Get next server's height and consensus
-		SERVERINFO=$(curl --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
+		SERVERINFO=$(curl --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 2 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
 		if [[ -z "$SERVERINFO" ]]; ## If null, try one more time to get server status
 		then
-			SERVERINFO=$(curl --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
+			SERVERINFO=$(curl --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 2 -s -S "http://"$SERVER""$PRT"/api/loader/status/sync")
 		fi
 		HEIGHT=$( echo "$SERVERINFO" | jq '.height')
 		CONSENSUS=$( echo "$SERVERINFO" | jq '.consensus')
@@ -64,10 +64,10 @@ while true; do
 			CONSENSUS="0"
 		else
 			## Get forging status of server
-			FORGE=$(curl --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
+			FORGE=$(curl --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 			if [[ -z "$FORGE" ]]; ## If null, try one more time to get forging status
 			then
-				FORGE=$(curl --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
+				FORGE=$(curl --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 			fi
 			if [[ "$FORGE" == "true" ]]; ## Current server forging
 			then
@@ -99,14 +99,14 @@ while true; do
 			if [ "$DIFF" -lt "4" ] && [ "${SERVERSCONSENSUS[$NUM]}" -gt "50" ]; 
 			then
 				date +"%Y-%m-%d %H:%M:%S || ${YELLOW}No node forging.  Starting on $SERVER${RESETCOLOR}"
-				ENABLEFORGE=$(curl -s -S --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
+				ENABLEFORGE=$(curl -s -S --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 2 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/enable | jq '.success')
 				if [ "$ENABLEFORGE" = "true" ];
 				then
 					date +"%Y-%m-%d %H:%M:%S || ${CYAN}Switching to Server $SERVER to try and forge.${RESETCOLOR}"
 					PREVIOUSFORGING=$NUM
 					break ## Leave servers loop
 				else
-					CHECKFORGE=$(curl --connect-timeout 1 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
+					CHECKFORGE=$(curl --connect-timeout 2 --retry 2 --retry-delay 0 --retry-max-time 2 -s "http://"$SERVER""$PRT"/api/delegates/forging/status?publicKey="$PBK| jq '.enabled')
 					if [ "$CHECKFORGE" = "true" ];
 					then
 						date +"%Y-%m-%d %H:%M:%S || ${YELLOW}Failed to enable forging on $SERVER.  However, it seems to be enabled now."
@@ -134,7 +134,7 @@ while true; do
 			for SERVER in "${SERVERS[@]}"
 			do
 				## Disable forging on all servers first
-				curl -s -S --connect-timeout 1 --retry 3 --retry-delay 0 --retry-max-time 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/disable
+				curl -s -S --connect-timeout 2 --retry 3 --retry-delay 0 --retry-max-time 3 -k -H "Content-Type: application/json" -X POST -d '{"secret":"'"$SECRET"'"}' https://"$SERVER""$PRTS"/api/delegates/forging/disable
 			done
 			sleep 1 ## Make sure disable had time to take effect
 			for index in "${!SERVERS[@]}"
