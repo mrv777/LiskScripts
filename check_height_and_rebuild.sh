@@ -1,13 +1,7 @@
 ## check_height_and_rebuild.sh
-## Version 0.9.5.1
+## Version 0.9.6
 ## Tested with jq 1.5.1 on Ubuntu 16.04.1
 ## 
-## Current snapshot sources and creation times
-## 00:00 & 12:00 UTC (isabella)
-## ----- & 15:00 UTC (punkrock)
-## 01:00, 05:00, 09:00, 13:00, 17:00, 21:00 UTC (Gr33nDrag0n)
-## 03:00, 07:00, 11:00, 15:00, 19:00, 23:00 UTC (MrV)
-## ----- & ----- UTC(redsn0w)
 #!/bin/bash
 
 ## Check for config file
@@ -58,7 +52,7 @@ function SyncState()
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
-			sleep 60 ## Wait 60 seconds to make sure Lisk isn't just down for a rebuild
+			sleep 90 ## Wait 90 seconds to make sure Lisk isn't just down for a rebuild
 			STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 			if [[ -z "$STATUS" ]];
 			then
@@ -99,8 +93,6 @@ find_newest_snap_rebuild(){
 	  https://snapshot.liskwallet.net			## isabella
 	  https://snapshot.lisknode.io				## Gr33nDrag0n
 	  https://lisktools.io/backups				## MrV
-	  https://snapshot.punkrock.me				## punkrock
-	  https://snap.lsknode.org				## redsn0w
 	)
 	
 	MATCHER="lisk_main_backup-[0-9]*\.gz"
@@ -197,7 +189,7 @@ local_height() {
 			## Thank you doweig for better output formating
 			date +"%Y-%m-%d %H:%M:%S || ${red}Rebuilding! Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
 			find_newest_snap_rebuild
-			sleep 60
+			sleep 90
 			SyncState
 			#sleep 420
 			## Thank you corsaro for this improvement
@@ -235,7 +227,7 @@ while true; do
 	STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 	if [[ -z "$STATUS" ]];
 	then
-		sleep 45 ## Wait 45 seconds to make sure Lisk isn't just down for a rebuild
+		sleep 90 ## Wait 90 seconds to make sure Lisk isn't just down for a rebuild
 		STATUS="$(bash lisk.sh status | grep 'Lisk is running as PID')"
 		if [[ -z "$STATUS" ]];
 		then
@@ -247,10 +239,11 @@ while true; do
 		fi
 	fi
 	
+	SyncState
 	top_height
 	local_height
 
 	## Thank you doweig for better output formating
 	date +"%Y-%m-%d %H:%M:%S || ${green}Local: $CHECKSRV, Highest: $HEIGHT, Diff: $diff${resetColor}"
-	sleep 10
+	sleep 8
 done
